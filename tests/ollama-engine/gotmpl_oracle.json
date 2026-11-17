@@ -1,0 +1,4026 @@
+[
+ {
+  "name": "alfred.gotmpl/ssua",
+  "template": "{{- range .Messages }}\u003cstart_{{ .Role }}\u003e{{ .Content }}\u003cend_message\u003e\n{{- end }}\u003cstart_assistant\u003e",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003cstart_system\u003esys one\n\nsys two\u003cend_message\u003e\u003cstart_user\u003eq\u003cend_message\u003e\u003cstart_assistant\u003ea\u003cend_message\u003e\u003cstart_assistant\u003e"
+ },
+ {
+  "name": "alfred.gotmpl/suau",
+  "template": "{{- range .Messages }}\u003cstart_{{ .Role }}\u003e{{ .Content }}\u003cend_message\u003e\n{{- end }}\u003cstart_assistant\u003e",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003cstart_system\u003eYou are a helpful assistant.\u003cend_message\u003e\u003cstart_user\u003eHello, how are you?\u003cend_message\u003e\u003cstart_assistant\u003eI'm doing great. How can I help you today?\u003cend_message\u003e\u003cstart_user\u003eI'd like to show off how chat templating works!\u003cend_message\u003e\u003cstart_assistant\u003e"
+ },
+ {
+  "name": "alfred.gotmpl/u",
+  "template": "{{- range .Messages }}\u003cstart_{{ .Role }}\u003e{{ .Content }}\u003cend_message\u003e\n{{- end }}\u003cstart_assistant\u003e",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "\u003cstart_user\u003eHello, how are you?\u003cend_message\u003e\u003cstart_assistant\u003e"
+ },
+ {
+  "name": "alfred.gotmpl/ua",
+  "template": "{{- range .Messages }}\u003cstart_{{ .Role }}\u003e{{ .Content }}\u003cend_message\u003e\n{{- end }}\u003cstart_assistant\u003e",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003cstart_user\u003eq\u003cend_message\u003e\u003cstart_assistant\u003ea\u003cend_message\u003e\u003cstart_assistant\u003e"
+ },
+ {
+  "name": "alfred.gotmpl/uau",
+  "template": "{{- range .Messages }}\u003cstart_{{ .Role }}\u003e{{ .Content }}\u003cend_message\u003e\n{{- end }}\u003cstart_assistant\u003e",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003cstart_user\u003eHello, how are you?\u003cend_message\u003e\u003cstart_assistant\u003eI'm doing great. How can I help you today?\u003cend_message\u003e\u003cstart_user\u003eI'd like to show off how chat templating works!\u003cend_message\u003e\u003cstart_assistant\u003e"
+ },
+ {
+  "name": "alfred.gotmpl/uu",
+  "template": "{{- range .Messages }}\u003cstart_{{ .Role }}\u003e{{ .Content }}\u003cend_message\u003e\n{{- end }}\u003cstart_assistant\u003e",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "\u003cstart_user\u003efirst\n\nsecond\u003cend_message\u003e\u003cstart_assistant\u003e"
+ },
+ {
+  "name": "alpaca.gotmpl/ssua",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}### Instruction:\n{{ .Content }}\n\n{{ else if eq .Role \"assistant\" }}### Response:\n{{ .Content }}\n\n{{ end }}\n{{- end }}### Response:\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "sys one\n\nsys two\n\n### Instruction:\nq\n\n### Response:\na\n\n### Response:\n"
+ },
+ {
+  "name": "alpaca.gotmpl/suau",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}### Instruction:\n{{ .Content }}\n\n{{ else if eq .Role \"assistant\" }}### Response:\n{{ .Content }}\n\n{{ end }}\n{{- end }}### Response:\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "You are a helpful assistant.\n\n### Instruction:\nHello, how are you?\n\n### Response:\nI'm doing great. How can I help you today?\n\n### Instruction:\nI'd like to show off how chat templating works!\n\n### Response:\n"
+ },
+ {
+  "name": "alpaca.gotmpl/u",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}### Instruction:\n{{ .Content }}\n\n{{ else if eq .Role \"assistant\" }}### Response:\n{{ .Content }}\n\n{{ end }}\n{{- end }}### Response:\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "### Instruction:\nHello, how are you?\n\n### Response:\n"
+ },
+ {
+  "name": "alpaca.gotmpl/ua",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}### Instruction:\n{{ .Content }}\n\n{{ else if eq .Role \"assistant\" }}### Response:\n{{ .Content }}\n\n{{ end }}\n{{- end }}### Response:\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "### Instruction:\nq\n\n### Response:\na\n\n### Response:\n"
+ },
+ {
+  "name": "alpaca.gotmpl/uau",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}### Instruction:\n{{ .Content }}\n\n{{ else if eq .Role \"assistant\" }}### Response:\n{{ .Content }}\n\n{{ end }}\n{{- end }}### Response:\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "### Instruction:\nHello, how are you?\n\n### Response:\nI'm doing great. How can I help you today?\n\n### Instruction:\nI'd like to show off how chat templating works!\n\n### Response:\n"
+ },
+ {
+  "name": "alpaca.gotmpl/uu",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}### Instruction:\n{{ .Content }}\n\n{{ else if eq .Role \"assistant\" }}### Response:\n{{ .Content }}\n\n{{ end }}\n{{- end }}### Response:\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "### Instruction:\nfirst\n\nsecond\n\n### Response:\n"
+ },
+ {
+  "name": "chatml.gotmpl/ssua",
+  "template": "{{- range .Messages }}\u003c|im_start|\u003e{{ .Role }}\n{{ .Content }}\u003c|im_end|\u003e\n{{ end }}\u003c|im_start|\u003eassistant\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003c|im_start|\u003esystem\nsys one\n\nsys two\u003c|im_end|\u003e\n\u003c|im_start|\u003euser\nq\u003c|im_end|\u003e\n\u003c|im_start|\u003eassistant\na\u003c|im_end|\u003e\n\u003c|im_start|\u003eassistant\n"
+ },
+ {
+  "name": "chatml.gotmpl/suau",
+  "template": "{{- range .Messages }}\u003c|im_start|\u003e{{ .Role }}\n{{ .Content }}\u003c|im_end|\u003e\n{{ end }}\u003c|im_start|\u003eassistant\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003c|im_start|\u003esystem\nYou are a helpful assistant.\u003c|im_end|\u003e\n\u003c|im_start|\u003euser\nHello, how are you?\u003c|im_end|\u003e\n\u003c|im_start|\u003eassistant\nI'm doing great. How can I help you today?\u003c|im_end|\u003e\n\u003c|im_start|\u003euser\nI'd like to show off how chat templating works!\u003c|im_end|\u003e\n\u003c|im_start|\u003eassistant\n"
+ },
+ {
+  "name": "chatml.gotmpl/u",
+  "template": "{{- range .Messages }}\u003c|im_start|\u003e{{ .Role }}\n{{ .Content }}\u003c|im_end|\u003e\n{{ end }}\u003c|im_start|\u003eassistant\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "\u003c|im_start|\u003euser\nHello, how are you?\u003c|im_end|\u003e\n\u003c|im_start|\u003eassistant\n"
+ },
+ {
+  "name": "chatml.gotmpl/ua",
+  "template": "{{- range .Messages }}\u003c|im_start|\u003e{{ .Role }}\n{{ .Content }}\u003c|im_end|\u003e\n{{ end }}\u003c|im_start|\u003eassistant\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003c|im_start|\u003euser\nq\u003c|im_end|\u003e\n\u003c|im_start|\u003eassistant\na\u003c|im_end|\u003e\n\u003c|im_start|\u003eassistant\n"
+ },
+ {
+  "name": "chatml.gotmpl/uau",
+  "template": "{{- range .Messages }}\u003c|im_start|\u003e{{ .Role }}\n{{ .Content }}\u003c|im_end|\u003e\n{{ end }}\u003c|im_start|\u003eassistant\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003c|im_start|\u003euser\nHello, how are you?\u003c|im_end|\u003e\n\u003c|im_start|\u003eassistant\nI'm doing great. How can I help you today?\u003c|im_end|\u003e\n\u003c|im_start|\u003euser\nI'd like to show off how chat templating works!\u003c|im_end|\u003e\n\u003c|im_start|\u003eassistant\n"
+ },
+ {
+  "name": "chatml.gotmpl/uu",
+  "template": "{{- range .Messages }}\u003c|im_start|\u003e{{ .Role }}\n{{ .Content }}\u003c|im_end|\u003e\n{{ end }}\u003c|im_start|\u003eassistant\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "\u003c|im_start|\u003euser\nfirst\n\nsecond\u003c|im_end|\u003e\n\u003c|im_start|\u003eassistant\n"
+ },
+ {
+  "name": "chatqa.gotmpl/ssua",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}System:\n{{- else if eq .Role \"user\" }}User:\n{{- else if eq .Role \"assistant\" }}Assistant:\n{{- end }} {{ .Content }}\n\n{{ end }}Assistant:",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "System: sys one\n\nsys two\n\nUser: q\n\nAssistant: a\n\nAssistant:"
+ },
+ {
+  "name": "chatqa.gotmpl/suau",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}System:\n{{- else if eq .Role \"user\" }}User:\n{{- else if eq .Role \"assistant\" }}Assistant:\n{{- end }} {{ .Content }}\n\n{{ end }}Assistant:",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "System: You are a helpful assistant.\n\nUser: Hello, how are you?\n\nAssistant: I'm doing great. How can I help you today?\n\nUser: I'd like to show off how chat templating works!\n\nAssistant:"
+ },
+ {
+  "name": "chatqa.gotmpl/u",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}System:\n{{- else if eq .Role \"user\" }}User:\n{{- else if eq .Role \"assistant\" }}Assistant:\n{{- end }} {{ .Content }}\n\n{{ end }}Assistant:",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "User: Hello, how are you?\n\nAssistant:"
+ },
+ {
+  "name": "chatqa.gotmpl/ua",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}System:\n{{- else if eq .Role \"user\" }}User:\n{{- else if eq .Role \"assistant\" }}Assistant:\n{{- end }} {{ .Content }}\n\n{{ end }}Assistant:",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "User: q\n\nAssistant: a\n\nAssistant:"
+ },
+ {
+  "name": "chatqa.gotmpl/uau",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}System:\n{{- else if eq .Role \"user\" }}User:\n{{- else if eq .Role \"assistant\" }}Assistant:\n{{- end }} {{ .Content }}\n\n{{ end }}Assistant:",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "User: Hello, how are you?\n\nAssistant: I'm doing great. How can I help you today?\n\nUser: I'd like to show off how chat templating works!\n\nAssistant:"
+ },
+ {
+  "name": "chatqa.gotmpl/uu",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}System:\n{{- else if eq .Role \"user\" }}User:\n{{- else if eq .Role \"assistant\" }}Assistant:\n{{- end }} {{ .Content }}\n\n{{ end }}Assistant:",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "User: first\n\nsecond\n\nAssistant:"
+ },
+ {
+  "name": "codellama-70b-instruct.gotmpl/ssua",
+  "template": "{{- range .Messages }}Source:\n{{- if eq .Role \"system\" }} system\n{{- else if eq .Role \"user\" }} user\n{{- else if eq .Role \"assistant\" }} assistant\n{{- end }}\n\n {{ .Content }} \u003cstep\u003e {{ end }}Source: assistant\nDestination: user\n\n ",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "Source: system\n\n sys one\n\nsys two \u003cstep\u003e Source: user\n\n q \u003cstep\u003e Source: assistant\n\n a \u003cstep\u003e Source: assistant\nDestination: user\n\n "
+ },
+ {
+  "name": "codellama-70b-instruct.gotmpl/suau",
+  "template": "{{- range .Messages }}Source:\n{{- if eq .Role \"system\" }} system\n{{- else if eq .Role \"user\" }} user\n{{- else if eq .Role \"assistant\" }} assistant\n{{- end }}\n\n {{ .Content }} \u003cstep\u003e {{ end }}Source: assistant\nDestination: user\n\n ",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "Source: system\n\n You are a helpful assistant. \u003cstep\u003e Source: user\n\n Hello, how are you? \u003cstep\u003e Source: assistant\n\n I'm doing great. How can I help you today? \u003cstep\u003e Source: user\n\n I'd like to show off how chat templating works! \u003cstep\u003e Source: assistant\nDestination: user\n\n "
+ },
+ {
+  "name": "codellama-70b-instruct.gotmpl/u",
+  "template": "{{- range .Messages }}Source:\n{{- if eq .Role \"system\" }} system\n{{- else if eq .Role \"user\" }} user\n{{- else if eq .Role \"assistant\" }} assistant\n{{- end }}\n\n {{ .Content }} \u003cstep\u003e {{ end }}Source: assistant\nDestination: user\n\n ",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "Source: user\n\n Hello, how are you? \u003cstep\u003e Source: assistant\nDestination: user\n\n "
+ },
+ {
+  "name": "codellama-70b-instruct.gotmpl/ua",
+  "template": "{{- range .Messages }}Source:\n{{- if eq .Role \"system\" }} system\n{{- else if eq .Role \"user\" }} user\n{{- else if eq .Role \"assistant\" }} assistant\n{{- end }}\n\n {{ .Content }} \u003cstep\u003e {{ end }}Source: assistant\nDestination: user\n\n ",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "Source: user\n\n q \u003cstep\u003e Source: assistant\n\n a \u003cstep\u003e Source: assistant\nDestination: user\n\n "
+ },
+ {
+  "name": "codellama-70b-instruct.gotmpl/uau",
+  "template": "{{- range .Messages }}Source:\n{{- if eq .Role \"system\" }} system\n{{- else if eq .Role \"user\" }} user\n{{- else if eq .Role \"assistant\" }} assistant\n{{- end }}\n\n {{ .Content }} \u003cstep\u003e {{ end }}Source: assistant\nDestination: user\n\n ",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "Source: user\n\n Hello, how are you? \u003cstep\u003e Source: assistant\n\n I'm doing great. How can I help you today? \u003cstep\u003e Source: user\n\n I'd like to show off how chat templating works! \u003cstep\u003e Source: assistant\nDestination: user\n\n "
+ },
+ {
+  "name": "codellama-70b-instruct.gotmpl/uu",
+  "template": "{{- range .Messages }}Source:\n{{- if eq .Role \"system\" }} system\n{{- else if eq .Role \"user\" }} user\n{{- else if eq .Role \"assistant\" }} assistant\n{{- end }}\n\n {{ .Content }} \u003cstep\u003e {{ end }}Source: assistant\nDestination: user\n\n ",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "Source: user\n\n first\n\nsecond \u003cstep\u003e Source: assistant\nDestination: user\n\n "
+ },
+ {
+  "name": "command-r.gotmpl/ssua",
+  "template": "{{- if or .Tools .System }}\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003e\n{{- if .Tools }}# Safety Preamble\nThe instructions in this section override those in the task description and style guide sections. Don't answer questions that are harmful or immoral.\n\n# System Preamble\n## Basic Rules\nYou are a powerful conversational AI trained by Cohere to help people. You are augmented by a number of tools, and your job is to use and consume the output of these tools to best help the user. You will see a conversation history between yourself and a user, ending with an utterance from the user. You will then see a specific instruction instructing you what kind of response to generate. When you answer the user's requests, you cite your sources in your answers, according to those instructions.\n\n{{ if .System }}# User Preamble\n{{ .System }}\n{{- end }}\n\n## Available Tools\nHere is a list of tools that you have available to you:\n{{- range .Tools }}\n\n```python\ndef {{ .Function.Name }}(\n{{- range $name, $property := .Function.Parameters.Properties }}{{ $name }}: {{ $property.Type }}, {{ end }}) -\u003e List[Dict]:\n    '''{{ .Function.Description }}\n\n{{- if .Function.Parameters.Properties }}\n\n    Args:\n{{- range $name, $property := .Function.Parameters.Properties }}\n        {{ $name }} ({{ $property.Type }}): {{ $property.Description }}\n{{- end }}\n{{- end }}\n    '''\n    pass\n```\n{{- end }}\n{{- else if .System }}{{ .System }}\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\n{{- end }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- continue }}\n{{- end }}\u003c|START_OF_TURN_TOKEN|\u003e\n{{- if eq .Role \"user\" }}\u003c|USER_TOKEN|\u003e{{ .Content }}\n{{- if $.Tools }}\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003eWrite 'Action:' followed by a json-formatted list of actions that you want to perform in order to produce a good response to the user's last input. You can use any of the supplied tools any number of times, but you should aim to execute the minimum number of necessary actions for the input. You should use the `directly-answer` tool if calling the other tools is unnecessary. The list of actions you want to call should be formatted as a list of json objects, for example:\n```json\n[\n    {\n        \"tool_name\": title of the tool in the specification,\n        \"parameters\": a dict of parameters to input into the tool as they are defined in the specs, or {} if it takes no parameters\n    }\n]```\n{{- end }}\n{{- else if eq .Role \"assistant\" }}\u003c|CHATBOT_TOKEN|\u003e\n{{- if .Content }}{{ .Content }}\n{{- else if .ToolCalls }}\nAction: ```json\n[\n{{- range .ToolCalls }}\n    {\n        \"tool_name\": \"{{ .Function.Name }}\",\n        \"parameters\": {{ .Function.Arguments }}\n    }\n{{- end }}\n]```\n{{- end }}\n{{- else if eq .Role \"tool\" }}\u003c|SYSTEM_TOKEN|\u003e\u003cresults\u003e\nconsole_output: {{ .Content }}\n\u003c/results\u003e\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003e\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003esys one\n\nsys two\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|USER_TOKEN|\u003eq\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003ea\u003c|END_OF_TURN_TOKEN|\u003e\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003e\n"
+ },
+ {
+  "name": "command-r.gotmpl/suau",
+  "template": "{{- if or .Tools .System }}\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003e\n{{- if .Tools }}# Safety Preamble\nThe instructions in this section override those in the task description and style guide sections. Don't answer questions that are harmful or immoral.\n\n# System Preamble\n## Basic Rules\nYou are a powerful conversational AI trained by Cohere to help people. You are augmented by a number of tools, and your job is to use and consume the output of these tools to best help the user. You will see a conversation history between yourself and a user, ending with an utterance from the user. You will then see a specific instruction instructing you what kind of response to generate. When you answer the user's requests, you cite your sources in your answers, according to those instructions.\n\n{{ if .System }}# User Preamble\n{{ .System }}\n{{- end }}\n\n## Available Tools\nHere is a list of tools that you have available to you:\n{{- range .Tools }}\n\n```python\ndef {{ .Function.Name }}(\n{{- range $name, $property := .Function.Parameters.Properties }}{{ $name }}: {{ $property.Type }}, {{ end }}) -\u003e List[Dict]:\n    '''{{ .Function.Description }}\n\n{{- if .Function.Parameters.Properties }}\n\n    Args:\n{{- range $name, $property := .Function.Parameters.Properties }}\n        {{ $name }} ({{ $property.Type }}): {{ $property.Description }}\n{{- end }}\n{{- end }}\n    '''\n    pass\n```\n{{- end }}\n{{- else if .System }}{{ .System }}\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\n{{- end }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- continue }}\n{{- end }}\u003c|START_OF_TURN_TOKEN|\u003e\n{{- if eq .Role \"user\" }}\u003c|USER_TOKEN|\u003e{{ .Content }}\n{{- if $.Tools }}\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003eWrite 'Action:' followed by a json-formatted list of actions that you want to perform in order to produce a good response to the user's last input. You can use any of the supplied tools any number of times, but you should aim to execute the minimum number of necessary actions for the input. You should use the `directly-answer` tool if calling the other tools is unnecessary. The list of actions you want to call should be formatted as a list of json objects, for example:\n```json\n[\n    {\n        \"tool_name\": title of the tool in the specification,\n        \"parameters\": a dict of parameters to input into the tool as they are defined in the specs, or {} if it takes no parameters\n    }\n]```\n{{- end }}\n{{- else if eq .Role \"assistant\" }}\u003c|CHATBOT_TOKEN|\u003e\n{{- if .Content }}{{ .Content }}\n{{- else if .ToolCalls }}\nAction: ```json\n[\n{{- range .ToolCalls }}\n    {\n        \"tool_name\": \"{{ .Function.Name }}\",\n        \"parameters\": {{ .Function.Arguments }}\n    }\n{{- end }}\n]```\n{{- end }}\n{{- else if eq .Role \"tool\" }}\u003c|SYSTEM_TOKEN|\u003e\u003cresults\u003e\nconsole_output: {{ .Content }}\n\u003c/results\u003e\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003e\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003eYou are a helpful assistant.\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|USER_TOKEN|\u003eHello, how are you?\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003eI'm doing great. How can I help you today?\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|USER_TOKEN|\u003eI'd like to show off how chat templating works!\u003c|END_OF_TURN_TOKEN|\u003e\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003e\n"
+ },
+ {
+  "name": "command-r.gotmpl/u",
+  "template": "{{- if or .Tools .System }}\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003e\n{{- if .Tools }}# Safety Preamble\nThe instructions in this section override those in the task description and style guide sections. Don't answer questions that are harmful or immoral.\n\n# System Preamble\n## Basic Rules\nYou are a powerful conversational AI trained by Cohere to help people. You are augmented by a number of tools, and your job is to use and consume the output of these tools to best help the user. You will see a conversation history between yourself and a user, ending with an utterance from the user. You will then see a specific instruction instructing you what kind of response to generate. When you answer the user's requests, you cite your sources in your answers, according to those instructions.\n\n{{ if .System }}# User Preamble\n{{ .System }}\n{{- end }}\n\n## Available Tools\nHere is a list of tools that you have available to you:\n{{- range .Tools }}\n\n```python\ndef {{ .Function.Name }}(\n{{- range $name, $property := .Function.Parameters.Properties }}{{ $name }}: {{ $property.Type }}, {{ end }}) -\u003e List[Dict]:\n    '''{{ .Function.Description }}\n\n{{- if .Function.Parameters.Properties }}\n\n    Args:\n{{- range $name, $property := .Function.Parameters.Properties }}\n        {{ $name }} ({{ $property.Type }}): {{ $property.Description }}\n{{- end }}\n{{- end }}\n    '''\n    pass\n```\n{{- end }}\n{{- else if .System }}{{ .System }}\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\n{{- end }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- continue }}\n{{- end }}\u003c|START_OF_TURN_TOKEN|\u003e\n{{- if eq .Role \"user\" }}\u003c|USER_TOKEN|\u003e{{ .Content }}\n{{- if $.Tools }}\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003eWrite 'Action:' followed by a json-formatted list of actions that you want to perform in order to produce a good response to the user's last input. You can use any of the supplied tools any number of times, but you should aim to execute the minimum number of necessary actions for the input. You should use the `directly-answer` tool if calling the other tools is unnecessary. The list of actions you want to call should be formatted as a list of json objects, for example:\n```json\n[\n    {\n        \"tool_name\": title of the tool in the specification,\n        \"parameters\": a dict of parameters to input into the tool as they are defined in the specs, or {} if it takes no parameters\n    }\n]```\n{{- end }}\n{{- else if eq .Role \"assistant\" }}\u003c|CHATBOT_TOKEN|\u003e\n{{- if .Content }}{{ .Content }}\n{{- else if .ToolCalls }}\nAction: ```json\n[\n{{- range .ToolCalls }}\n    {\n        \"tool_name\": \"{{ .Function.Name }}\",\n        \"parameters\": {{ .Function.Arguments }}\n    }\n{{- end }}\n]```\n{{- end }}\n{{- else if eq .Role \"tool\" }}\u003c|SYSTEM_TOKEN|\u003e\u003cresults\u003e\nconsole_output: {{ .Content }}\n\u003c/results\u003e\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003e\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "\u003c|START_OF_TURN_TOKEN|\u003e\u003c|USER_TOKEN|\u003eHello, how are you?\u003c|END_OF_TURN_TOKEN|\u003e\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003e\n"
+ },
+ {
+  "name": "command-r.gotmpl/ua",
+  "template": "{{- if or .Tools .System }}\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003e\n{{- if .Tools }}# Safety Preamble\nThe instructions in this section override those in the task description and style guide sections. Don't answer questions that are harmful or immoral.\n\n# System Preamble\n## Basic Rules\nYou are a powerful conversational AI trained by Cohere to help people. You are augmented by a number of tools, and your job is to use and consume the output of these tools to best help the user. You will see a conversation history between yourself and a user, ending with an utterance from the user. You will then see a specific instruction instructing you what kind of response to generate. When you answer the user's requests, you cite your sources in your answers, according to those instructions.\n\n{{ if .System }}# User Preamble\n{{ .System }}\n{{- end }}\n\n## Available Tools\nHere is a list of tools that you have available to you:\n{{- range .Tools }}\n\n```python\ndef {{ .Function.Name }}(\n{{- range $name, $property := .Function.Parameters.Properties }}{{ $name }}: {{ $property.Type }}, {{ end }}) -\u003e List[Dict]:\n    '''{{ .Function.Description }}\n\n{{- if .Function.Parameters.Properties }}\n\n    Args:\n{{- range $name, $property := .Function.Parameters.Properties }}\n        {{ $name }} ({{ $property.Type }}): {{ $property.Description }}\n{{- end }}\n{{- end }}\n    '''\n    pass\n```\n{{- end }}\n{{- else if .System }}{{ .System }}\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\n{{- end }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- continue }}\n{{- end }}\u003c|START_OF_TURN_TOKEN|\u003e\n{{- if eq .Role \"user\" }}\u003c|USER_TOKEN|\u003e{{ .Content }}\n{{- if $.Tools }}\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003eWrite 'Action:' followed by a json-formatted list of actions that you want to perform in order to produce a good response to the user's last input. You can use any of the supplied tools any number of times, but you should aim to execute the minimum number of necessary actions for the input. You should use the `directly-answer` tool if calling the other tools is unnecessary. The list of actions you want to call should be formatted as a list of json objects, for example:\n```json\n[\n    {\n        \"tool_name\": title of the tool in the specification,\n        \"parameters\": a dict of parameters to input into the tool as they are defined in the specs, or {} if it takes no parameters\n    }\n]```\n{{- end }}\n{{- else if eq .Role \"assistant\" }}\u003c|CHATBOT_TOKEN|\u003e\n{{- if .Content }}{{ .Content }}\n{{- else if .ToolCalls }}\nAction: ```json\n[\n{{- range .ToolCalls }}\n    {\n        \"tool_name\": \"{{ .Function.Name }}\",\n        \"parameters\": {{ .Function.Arguments }}\n    }\n{{- end }}\n]```\n{{- end }}\n{{- else if eq .Role \"tool\" }}\u003c|SYSTEM_TOKEN|\u003e\u003cresults\u003e\nconsole_output: {{ .Content }}\n\u003c/results\u003e\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003e\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003c|START_OF_TURN_TOKEN|\u003e\u003c|USER_TOKEN|\u003eq\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003ea\u003c|END_OF_TURN_TOKEN|\u003e\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003e\n"
+ },
+ {
+  "name": "command-r.gotmpl/uau",
+  "template": "{{- if or .Tools .System }}\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003e\n{{- if .Tools }}# Safety Preamble\nThe instructions in this section override those in the task description and style guide sections. Don't answer questions that are harmful or immoral.\n\n# System Preamble\n## Basic Rules\nYou are a powerful conversational AI trained by Cohere to help people. You are augmented by a number of tools, and your job is to use and consume the output of these tools to best help the user. You will see a conversation history between yourself and a user, ending with an utterance from the user. You will then see a specific instruction instructing you what kind of response to generate. When you answer the user's requests, you cite your sources in your answers, according to those instructions.\n\n{{ if .System }}# User Preamble\n{{ .System }}\n{{- end }}\n\n## Available Tools\nHere is a list of tools that you have available to you:\n{{- range .Tools }}\n\n```python\ndef {{ .Function.Name }}(\n{{- range $name, $property := .Function.Parameters.Properties }}{{ $name }}: {{ $property.Type }}, {{ end }}) -\u003e List[Dict]:\n    '''{{ .Function.Description }}\n\n{{- if .Function.Parameters.Properties }}\n\n    Args:\n{{- range $name, $property := .Function.Parameters.Properties }}\n        {{ $name }} ({{ $property.Type }}): {{ $property.Description }}\n{{- end }}\n{{- end }}\n    '''\n    pass\n```\n{{- end }}\n{{- else if .System }}{{ .System }}\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\n{{- end }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- continue }}\n{{- end }}\u003c|START_OF_TURN_TOKEN|\u003e\n{{- if eq .Role \"user\" }}\u003c|USER_TOKEN|\u003e{{ .Content }}\n{{- if $.Tools }}\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003eWrite 'Action:' followed by a json-formatted list of actions that you want to perform in order to produce a good response to the user's last input. You can use any of the supplied tools any number of times, but you should aim to execute the minimum number of necessary actions for the input. You should use the `directly-answer` tool if calling the other tools is unnecessary. The list of actions you want to call should be formatted as a list of json objects, for example:\n```json\n[\n    {\n        \"tool_name\": title of the tool in the specification,\n        \"parameters\": a dict of parameters to input into the tool as they are defined in the specs, or {} if it takes no parameters\n    }\n]```\n{{- end }}\n{{- else if eq .Role \"assistant\" }}\u003c|CHATBOT_TOKEN|\u003e\n{{- if .Content }}{{ .Content }}\n{{- else if .ToolCalls }}\nAction: ```json\n[\n{{- range .ToolCalls }}\n    {\n        \"tool_name\": \"{{ .Function.Name }}\",\n        \"parameters\": {{ .Function.Arguments }}\n    }\n{{- end }}\n]```\n{{- end }}\n{{- else if eq .Role \"tool\" }}\u003c|SYSTEM_TOKEN|\u003e\u003cresults\u003e\nconsole_output: {{ .Content }}\n\u003c/results\u003e\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003e\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003c|START_OF_TURN_TOKEN|\u003e\u003c|USER_TOKEN|\u003eHello, how are you?\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003eI'm doing great. How can I help you today?\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|USER_TOKEN|\u003eI'd like to show off how chat templating works!\u003c|END_OF_TURN_TOKEN|\u003e\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003e\n"
+ },
+ {
+  "name": "command-r.gotmpl/uu",
+  "template": "{{- if or .Tools .System }}\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003e\n{{- if .Tools }}# Safety Preamble\nThe instructions in this section override those in the task description and style guide sections. Don't answer questions that are harmful or immoral.\n\n# System Preamble\n## Basic Rules\nYou are a powerful conversational AI trained by Cohere to help people. You are augmented by a number of tools, and your job is to use and consume the output of these tools to best help the user. You will see a conversation history between yourself and a user, ending with an utterance from the user. You will then see a specific instruction instructing you what kind of response to generate. When you answer the user's requests, you cite your sources in your answers, according to those instructions.\n\n{{ if .System }}# User Preamble\n{{ .System }}\n{{- end }}\n\n## Available Tools\nHere is a list of tools that you have available to you:\n{{- range .Tools }}\n\n```python\ndef {{ .Function.Name }}(\n{{- range $name, $property := .Function.Parameters.Properties }}{{ $name }}: {{ $property.Type }}, {{ end }}) -\u003e List[Dict]:\n    '''{{ .Function.Description }}\n\n{{- if .Function.Parameters.Properties }}\n\n    Args:\n{{- range $name, $property := .Function.Parameters.Properties }}\n        {{ $name }} ({{ $property.Type }}): {{ $property.Description }}\n{{- end }}\n{{- end }}\n    '''\n    pass\n```\n{{- end }}\n{{- else if .System }}{{ .System }}\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\n{{- end }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- continue }}\n{{- end }}\u003c|START_OF_TURN_TOKEN|\u003e\n{{- if eq .Role \"user\" }}\u003c|USER_TOKEN|\u003e{{ .Content }}\n{{- if $.Tools }}\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003eWrite 'Action:' followed by a json-formatted list of actions that you want to perform in order to produce a good response to the user's last input. You can use any of the supplied tools any number of times, but you should aim to execute the minimum number of necessary actions for the input. You should use the `directly-answer` tool if calling the other tools is unnecessary. The list of actions you want to call should be formatted as a list of json objects, for example:\n```json\n[\n    {\n        \"tool_name\": title of the tool in the specification,\n        \"parameters\": a dict of parameters to input into the tool as they are defined in the specs, or {} if it takes no parameters\n    }\n]```\n{{- end }}\n{{- else if eq .Role \"assistant\" }}\u003c|CHATBOT_TOKEN|\u003e\n{{- if .Content }}{{ .Content }}\n{{- else if .ToolCalls }}\nAction: ```json\n[\n{{- range .ToolCalls }}\n    {\n        \"tool_name\": \"{{ .Function.Name }}\",\n        \"parameters\": {{ .Function.Arguments }}\n    }\n{{- end }}\n]```\n{{- end }}\n{{- else if eq .Role \"tool\" }}\u003c|SYSTEM_TOKEN|\u003e\u003cresults\u003e\nconsole_output: {{ .Content }}\n\u003c/results\u003e\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003e\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "\u003c|START_OF_TURN_TOKEN|\u003e\u003c|USER_TOKEN|\u003efirst\n\nsecond\u003c|END_OF_TURN_TOKEN|\u003e\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003e\n"
+ },
+ {
+  "name": "falcon-instruct.gotmpl/ssua",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}System: {{ .Content }}\n{{ continue }}\n{{- else if eq .Role \"user\" }}User:\n{{- else if eq .Role \"assistant\" }}Falcon:\n{{- end }}\n{{ .Content }}\n{{ end }}Falcon:\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "System: sys one\n\nsys two\nUser:\nq\nFalcon:\na\nFalcon:\n"
+ },
+ {
+  "name": "falcon-instruct.gotmpl/suau",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}System: {{ .Content }}\n{{ continue }}\n{{- else if eq .Role \"user\" }}User:\n{{- else if eq .Role \"assistant\" }}Falcon:\n{{- end }}\n{{ .Content }}\n{{ end }}Falcon:\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "System: You are a helpful assistant.\nUser:\nHello, how are you?\nFalcon:\nI'm doing great. How can I help you today?\nUser:\nI'd like to show off how chat templating works!\nFalcon:\n"
+ },
+ {
+  "name": "falcon-instruct.gotmpl/u",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}System: {{ .Content }}\n{{ continue }}\n{{- else if eq .Role \"user\" }}User:\n{{- else if eq .Role \"assistant\" }}Falcon:\n{{- end }}\n{{ .Content }}\n{{ end }}Falcon:\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "User:\nHello, how are you?\nFalcon:\n"
+ },
+ {
+  "name": "falcon-instruct.gotmpl/ua",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}System: {{ .Content }}\n{{ continue }}\n{{- else if eq .Role \"user\" }}User:\n{{- else if eq .Role \"assistant\" }}Falcon:\n{{- end }}\n{{ .Content }}\n{{ end }}Falcon:\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "User:\nq\nFalcon:\na\nFalcon:\n"
+ },
+ {
+  "name": "falcon-instruct.gotmpl/uau",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}System: {{ .Content }}\n{{ continue }}\n{{- else if eq .Role \"user\" }}User:\n{{- else if eq .Role \"assistant\" }}Falcon:\n{{- end }}\n{{ .Content }}\n{{ end }}Falcon:\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "User:\nHello, how are you?\nFalcon:\nI'm doing great. How can I help you today?\nUser:\nI'd like to show off how chat templating works!\nFalcon:\n"
+ },
+ {
+  "name": "falcon-instruct.gotmpl/uu",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}System: {{ .Content }}\n{{ continue }}\n{{- else if eq .Role \"user\" }}User:\n{{- else if eq .Role \"assistant\" }}Falcon:\n{{- end }}\n{{ .Content }}\n{{ end }}Falcon:\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "User:\nfirst\n\nsecond\nFalcon:\n"
+ },
+ {
+  "name": "gemma-instruct.gotmpl/ssua",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- continue }}\n{{- else if eq .Role \"user\" }}\u003cstart_of_turn\u003euser\n{{- if $system }}\n{{ $system }}\n{{- $system = \"\" }}\n{{- end }}\n{{- else if eq .Role \"assistant\" }}\u003cstart_of_turn\u003emodel\n{{- end }}\n{{ .Content }}\u003cend_of_turn\u003e\n{{ end }}\u003cstart_of_turn\u003emodel\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003cstart_of_turn\u003euser\nsys one\n\nsys two\nq\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\na\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\n"
+ },
+ {
+  "name": "gemma-instruct.gotmpl/suau",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- continue }}\n{{- else if eq .Role \"user\" }}\u003cstart_of_turn\u003euser\n{{- if $system }}\n{{ $system }}\n{{- $system = \"\" }}\n{{- end }}\n{{- else if eq .Role \"assistant\" }}\u003cstart_of_turn\u003emodel\n{{- end }}\n{{ .Content }}\u003cend_of_turn\u003e\n{{ end }}\u003cstart_of_turn\u003emodel\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003cstart_of_turn\u003euser\nYou are a helpful assistant.\nHello, how are you?\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\nI'm doing great. How can I help you today?\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003euser\nI'd like to show off how chat templating works!\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\n"
+ },
+ {
+  "name": "gemma-instruct.gotmpl/u",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- continue }}\n{{- else if eq .Role \"user\" }}\u003cstart_of_turn\u003euser\n{{- if $system }}\n{{ $system }}\n{{- $system = \"\" }}\n{{- end }}\n{{- else if eq .Role \"assistant\" }}\u003cstart_of_turn\u003emodel\n{{- end }}\n{{ .Content }}\u003cend_of_turn\u003e\n{{ end }}\u003cstart_of_turn\u003emodel\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "\u003cstart_of_turn\u003euser\nHello, how are you?\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\n"
+ },
+ {
+  "name": "gemma-instruct.gotmpl/ua",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- continue }}\n{{- else if eq .Role \"user\" }}\u003cstart_of_turn\u003euser\n{{- if $system }}\n{{ $system }}\n{{- $system = \"\" }}\n{{- end }}\n{{- else if eq .Role \"assistant\" }}\u003cstart_of_turn\u003emodel\n{{- end }}\n{{ .Content }}\u003cend_of_turn\u003e\n{{ end }}\u003cstart_of_turn\u003emodel\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003cstart_of_turn\u003euser\nq\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\na\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\n"
+ },
+ {
+  "name": "gemma-instruct.gotmpl/uau",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- continue }}\n{{- else if eq .Role \"user\" }}\u003cstart_of_turn\u003euser\n{{- if $system }}\n{{ $system }}\n{{- $system = \"\" }}\n{{- end }}\n{{- else if eq .Role \"assistant\" }}\u003cstart_of_turn\u003emodel\n{{- end }}\n{{ .Content }}\u003cend_of_turn\u003e\n{{ end }}\u003cstart_of_turn\u003emodel\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003cstart_of_turn\u003euser\nHello, how are you?\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\nI'm doing great. How can I help you today?\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003euser\nI'd like to show off how chat templating works!\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\n"
+ },
+ {
+  "name": "gemma-instruct.gotmpl/uu",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- continue }}\n{{- else if eq .Role \"user\" }}\u003cstart_of_turn\u003euser\n{{- if $system }}\n{{ $system }}\n{{- $system = \"\" }}\n{{- end }}\n{{- else if eq .Role \"assistant\" }}\u003cstart_of_turn\u003emodel\n{{- end }}\n{{ .Content }}\u003cend_of_turn\u003e\n{{ end }}\u003cstart_of_turn\u003emodel\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "\u003cstart_of_turn\u003euser\nfirst\n\nsecond\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\n"
+ },
+ {
+  "name": "gemma3-instruct.gotmpl/ssua",
+  "template": "{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1 }}\n{{- if eq .Role \"user\" }}\u003cstart_of_turn\u003euser\n{{- if and (eq $i 1) $.System }}\n{{ $.System }}\n{{ end }}\n{{ .Content }}\u003cend_of_turn\u003e\n{{ else if eq .Role \"assistant\" }}\u003cstart_of_turn\u003emodel\n{{ .Content }}\u003cend_of_turn\u003e\n{{ end }}\n{{- if $last }}\u003cstart_of_turn\u003emodel\n{{ end }}\n{{- end }}\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003cstart_of_turn\u003euser\nsys one\n\nsys two\n\nq\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\na\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\n\n"
+ },
+ {
+  "name": "gemma3-instruct.gotmpl/suau",
+  "template": "{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1 }}\n{{- if eq .Role \"user\" }}\u003cstart_of_turn\u003euser\n{{- if and (eq $i 1) $.System }}\n{{ $.System }}\n{{ end }}\n{{ .Content }}\u003cend_of_turn\u003e\n{{ else if eq .Role \"assistant\" }}\u003cstart_of_turn\u003emodel\n{{ .Content }}\u003cend_of_turn\u003e\n{{ end }}\n{{- if $last }}\u003cstart_of_turn\u003emodel\n{{ end }}\n{{- end }}\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003cstart_of_turn\u003euser\nYou are a helpful assistant.\n\nHello, how are you?\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\nI'm doing great. How can I help you today?\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003euser\nI'd like to show off how chat templating works!\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\n\n"
+ },
+ {
+  "name": "gemma3-instruct.gotmpl/u",
+  "template": "{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1 }}\n{{- if eq .Role \"user\" }}\u003cstart_of_turn\u003euser\n{{- if and (eq $i 1) $.System }}\n{{ $.System }}\n{{ end }}\n{{ .Content }}\u003cend_of_turn\u003e\n{{ else if eq .Role \"assistant\" }}\u003cstart_of_turn\u003emodel\n{{ .Content }}\u003cend_of_turn\u003e\n{{ end }}\n{{- if $last }}\u003cstart_of_turn\u003emodel\n{{ end }}\n{{- end }}\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "\u003cstart_of_turn\u003euser\nHello, how are you?\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\n\n"
+ },
+ {
+  "name": "gemma3-instruct.gotmpl/ua",
+  "template": "{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1 }}\n{{- if eq .Role \"user\" }}\u003cstart_of_turn\u003euser\n{{- if and (eq $i 1) $.System }}\n{{ $.System }}\n{{ end }}\n{{ .Content }}\u003cend_of_turn\u003e\n{{ else if eq .Role \"assistant\" }}\u003cstart_of_turn\u003emodel\n{{ .Content }}\u003cend_of_turn\u003e\n{{ end }}\n{{- if $last }}\u003cstart_of_turn\u003emodel\n{{ end }}\n{{- end }}\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003cstart_of_turn\u003euser\nq\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\na\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\n\n"
+ },
+ {
+  "name": "gemma3-instruct.gotmpl/uau",
+  "template": "{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1 }}\n{{- if eq .Role \"user\" }}\u003cstart_of_turn\u003euser\n{{- if and (eq $i 1) $.System }}\n{{ $.System }}\n{{ end }}\n{{ .Content }}\u003cend_of_turn\u003e\n{{ else if eq .Role \"assistant\" }}\u003cstart_of_turn\u003emodel\n{{ .Content }}\u003cend_of_turn\u003e\n{{ end }}\n{{- if $last }}\u003cstart_of_turn\u003emodel\n{{ end }}\n{{- end }}\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003cstart_of_turn\u003euser\nHello, how are you?\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\nI'm doing great. How can I help you today?\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003euser\nI'd like to show off how chat templating works!\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\n\n"
+ },
+ {
+  "name": "gemma3-instruct.gotmpl/uu",
+  "template": "{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1 }}\n{{- if eq .Role \"user\" }}\u003cstart_of_turn\u003euser\n{{- if and (eq $i 1) $.System }}\n{{ $.System }}\n{{ end }}\n{{ .Content }}\u003cend_of_turn\u003e\n{{ else if eq .Role \"assistant\" }}\u003cstart_of_turn\u003emodel\n{{ .Content }}\u003cend_of_turn\u003e\n{{ end }}\n{{- if $last }}\u003cstart_of_turn\u003emodel\n{{ end }}\n{{- end }}\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "\u003cstart_of_turn\u003euser\nfirst\n\nsecond\u003cend_of_turn\u003e\n\u003cstart_of_turn\u003emodel\n\n"
+ },
+ {
+  "name": "granite-instruct.gotmpl/ssua",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}System:\n{{- else if eq .Role \"user\" }}Question:\n{{- else if eq .Role \"assistant\" }}Answer:\n{{- end }}\n{{ .Content }}\n\n{{ end }}Answer:\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "System:\nsys one\n\nsys two\n\nQuestion:\nq\n\nAnswer:\na\n\nAnswer:\n"
+ },
+ {
+  "name": "granite-instruct.gotmpl/suau",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}System:\n{{- else if eq .Role \"user\" }}Question:\n{{- else if eq .Role \"assistant\" }}Answer:\n{{- end }}\n{{ .Content }}\n\n{{ end }}Answer:\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "System:\nYou are a helpful assistant.\n\nQuestion:\nHello, how are you?\n\nAnswer:\nI'm doing great. How can I help you today?\n\nQuestion:\nI'd like to show off how chat templating works!\n\nAnswer:\n"
+ },
+ {
+  "name": "granite-instruct.gotmpl/u",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}System:\n{{- else if eq .Role \"user\" }}Question:\n{{- else if eq .Role \"assistant\" }}Answer:\n{{- end }}\n{{ .Content }}\n\n{{ end }}Answer:\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "Question:\nHello, how are you?\n\nAnswer:\n"
+ },
+ {
+  "name": "granite-instruct.gotmpl/ua",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}System:\n{{- else if eq .Role \"user\" }}Question:\n{{- else if eq .Role \"assistant\" }}Answer:\n{{- end }}\n{{ .Content }}\n\n{{ end }}Answer:\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "Question:\nq\n\nAnswer:\na\n\nAnswer:\n"
+ },
+ {
+  "name": "granite-instruct.gotmpl/uau",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}System:\n{{- else if eq .Role \"user\" }}Question:\n{{- else if eq .Role \"assistant\" }}Answer:\n{{- end }}\n{{ .Content }}\n\n{{ end }}Answer:\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "Question:\nHello, how are you?\n\nAnswer:\nI'm doing great. How can I help you today?\n\nQuestion:\nI'd like to show off how chat templating works!\n\nAnswer:\n"
+ },
+ {
+  "name": "granite-instruct.gotmpl/uu",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}System:\n{{- else if eq .Role \"user\" }}Question:\n{{- else if eq .Role \"assistant\" }}Answer:\n{{- end }}\n{{ .Content }}\n\n{{ end }}Answer:\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "Question:\nfirst\n\nsecond\n\nAnswer:\n"
+ },
+ {
+  "name": "llama2-chat.gotmpl/ssua",
+  "template": "{{- $system := \"\" }}[INST] {{ range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\u003c\u003cSYS\u003e\u003e\n{{- if $system }}\n{{ $system }}\n{{ $system = \"\" }}\n{{- end }}\u003c\u003c/SYS\u003e\u003e\n\n{{ .Content }} [/INST]\n{{- else if eq .Role \"assistant\" }} {{ .Content }}\u003c/s\u003e\u003cs\u003e[INST] {{ end }}\n{{- end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "[INST] \u003c\u003cSYS\u003e\u003e\nsys one\n\nsys two\n\u003c\u003c/SYS\u003e\u003e\n\nq [/INST] a\u003c/s\u003e\u003cs\u003e[INST] "
+ },
+ {
+  "name": "llama2-chat.gotmpl/suau",
+  "template": "{{- $system := \"\" }}[INST] {{ range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\u003c\u003cSYS\u003e\u003e\n{{- if $system }}\n{{ $system }}\n{{ $system = \"\" }}\n{{- end }}\u003c\u003c/SYS\u003e\u003e\n\n{{ .Content }} [/INST]\n{{- else if eq .Role \"assistant\" }} {{ .Content }}\u003c/s\u003e\u003cs\u003e[INST] {{ end }}\n{{- end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "[INST] \u003c\u003cSYS\u003e\u003e\nYou are a helpful assistant.\n\u003c\u003c/SYS\u003e\u003e\n\nHello, how are you? [/INST] I'm doing great. How can I help you today?\u003c/s\u003e\u003cs\u003e[INST] \u003c\u003cSYS\u003e\u003e\u003c\u003c/SYS\u003e\u003e\n\nI'd like to show off how chat templating works! [/INST]"
+ },
+ {
+  "name": "llama2-chat.gotmpl/u",
+  "template": "{{- $system := \"\" }}[INST] {{ range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\u003c\u003cSYS\u003e\u003e\n{{- if $system }}\n{{ $system }}\n{{ $system = \"\" }}\n{{- end }}\u003c\u003c/SYS\u003e\u003e\n\n{{ .Content }} [/INST]\n{{- else if eq .Role \"assistant\" }} {{ .Content }}\u003c/s\u003e\u003cs\u003e[INST] {{ end }}\n{{- end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "[INST] \u003c\u003cSYS\u003e\u003e\u003c\u003c/SYS\u003e\u003e\n\nHello, how are you? [/INST]"
+ },
+ {
+  "name": "llama2-chat.gotmpl/ua",
+  "template": "{{- $system := \"\" }}[INST] {{ range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\u003c\u003cSYS\u003e\u003e\n{{- if $system }}\n{{ $system }}\n{{ $system = \"\" }}\n{{- end }}\u003c\u003c/SYS\u003e\u003e\n\n{{ .Content }} [/INST]\n{{- else if eq .Role \"assistant\" }} {{ .Content }}\u003c/s\u003e\u003cs\u003e[INST] {{ end }}\n{{- end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "[INST] \u003c\u003cSYS\u003e\u003e\u003c\u003c/SYS\u003e\u003e\n\nq [/INST] a\u003c/s\u003e\u003cs\u003e[INST] "
+ },
+ {
+  "name": "llama2-chat.gotmpl/uau",
+  "template": "{{- $system := \"\" }}[INST] {{ range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\u003c\u003cSYS\u003e\u003e\n{{- if $system }}\n{{ $system }}\n{{ $system = \"\" }}\n{{- end }}\u003c\u003c/SYS\u003e\u003e\n\n{{ .Content }} [/INST]\n{{- else if eq .Role \"assistant\" }} {{ .Content }}\u003c/s\u003e\u003cs\u003e[INST] {{ end }}\n{{- end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "[INST] \u003c\u003cSYS\u003e\u003e\u003c\u003c/SYS\u003e\u003e\n\nHello, how are you? [/INST] I'm doing great. How can I help you today?\u003c/s\u003e\u003cs\u003e[INST] \u003c\u003cSYS\u003e\u003e\u003c\u003c/SYS\u003e\u003e\n\nI'd like to show off how chat templating works! [/INST]"
+ },
+ {
+  "name": "llama2-chat.gotmpl/uu",
+  "template": "{{- $system := \"\" }}[INST] {{ range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\u003c\u003cSYS\u003e\u003e\n{{- if $system }}\n{{ $system }}\n{{ $system = \"\" }}\n{{- end }}\u003c\u003c/SYS\u003e\u003e\n\n{{ .Content }} [/INST]\n{{- else if eq .Role \"assistant\" }} {{ .Content }}\u003c/s\u003e\u003cs\u003e[INST] {{ end }}\n{{- end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "[INST] \u003c\u003cSYS\u003e\u003e\u003c\u003c/SYS\u003e\u003e\n\nfirst\n\nsecond [/INST]"
+ },
+ {
+  "name": "llama3-instruct.gotmpl/ssua",
+  "template": "{{- range .Messages }}\u003c|start_header_id|\u003e{{ .Role }}\u003c|end_header_id|\u003e\n\n{{ .Content }}\u003c|eot_id|\u003e\n{{- end }}\u003c|start_header_id|\u003eassistant\u003c|end_header_id|\u003e\n\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003c|start_header_id|\u003esystem\u003c|end_header_id|\u003e\n\nsys one\n\nsys two\u003c|eot_id|\u003e\u003c|start_header_id|\u003euser\u003c|end_header_id|\u003e\n\nq\u003c|eot_id|\u003e\u003c|start_header_id|\u003eassistant\u003c|end_header_id|\u003e\n\na\u003c|eot_id|\u003e\u003c|start_header_id|\u003eassistant\u003c|end_header_id|\u003e\n\n"
+ },
+ {
+  "name": "llama3-instruct.gotmpl/suau",
+  "template": "{{- range .Messages }}\u003c|start_header_id|\u003e{{ .Role }}\u003c|end_header_id|\u003e\n\n{{ .Content }}\u003c|eot_id|\u003e\n{{- end }}\u003c|start_header_id|\u003eassistant\u003c|end_header_id|\u003e\n\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003c|start_header_id|\u003esystem\u003c|end_header_id|\u003e\n\nYou are a helpful assistant.\u003c|eot_id|\u003e\u003c|start_header_id|\u003euser\u003c|end_header_id|\u003e\n\nHello, how are you?\u003c|eot_id|\u003e\u003c|start_header_id|\u003eassistant\u003c|end_header_id|\u003e\n\nI'm doing great. How can I help you today?\u003c|eot_id|\u003e\u003c|start_header_id|\u003euser\u003c|end_header_id|\u003e\n\nI'd like to show off how chat templating works!\u003c|eot_id|\u003e\u003c|start_header_id|\u003eassistant\u003c|end_header_id|\u003e\n\n"
+ },
+ {
+  "name": "llama3-instruct.gotmpl/u",
+  "template": "{{- range .Messages }}\u003c|start_header_id|\u003e{{ .Role }}\u003c|end_header_id|\u003e\n\n{{ .Content }}\u003c|eot_id|\u003e\n{{- end }}\u003c|start_header_id|\u003eassistant\u003c|end_header_id|\u003e\n\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "\u003c|start_header_id|\u003euser\u003c|end_header_id|\u003e\n\nHello, how are you?\u003c|eot_id|\u003e\u003c|start_header_id|\u003eassistant\u003c|end_header_id|\u003e\n\n"
+ },
+ {
+  "name": "llama3-instruct.gotmpl/ua",
+  "template": "{{- range .Messages }}\u003c|start_header_id|\u003e{{ .Role }}\u003c|end_header_id|\u003e\n\n{{ .Content }}\u003c|eot_id|\u003e\n{{- end }}\u003c|start_header_id|\u003eassistant\u003c|end_header_id|\u003e\n\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003c|start_header_id|\u003euser\u003c|end_header_id|\u003e\n\nq\u003c|eot_id|\u003e\u003c|start_header_id|\u003eassistant\u003c|end_header_id|\u003e\n\na\u003c|eot_id|\u003e\u003c|start_header_id|\u003eassistant\u003c|end_header_id|\u003e\n\n"
+ },
+ {
+  "name": "llama3-instruct.gotmpl/uau",
+  "template": "{{- range .Messages }}\u003c|start_header_id|\u003e{{ .Role }}\u003c|end_header_id|\u003e\n\n{{ .Content }}\u003c|eot_id|\u003e\n{{- end }}\u003c|start_header_id|\u003eassistant\u003c|end_header_id|\u003e\n\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003c|start_header_id|\u003euser\u003c|end_header_id|\u003e\n\nHello, how are you?\u003c|eot_id|\u003e\u003c|start_header_id|\u003eassistant\u003c|end_header_id|\u003e\n\nI'm doing great. How can I help you today?\u003c|eot_id|\u003e\u003c|start_header_id|\u003euser\u003c|end_header_id|\u003e\n\nI'd like to show off how chat templating works!\u003c|eot_id|\u003e\u003c|start_header_id|\u003eassistant\u003c|end_header_id|\u003e\n\n"
+ },
+ {
+  "name": "llama3-instruct.gotmpl/uu",
+  "template": "{{- range .Messages }}\u003c|start_header_id|\u003e{{ .Role }}\u003c|end_header_id|\u003e\n\n{{ .Content }}\u003c|eot_id|\u003e\n{{- end }}\u003c|start_header_id|\u003eassistant\u003c|end_header_id|\u003e\n\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "\u003c|start_header_id|\u003euser\u003c|end_header_id|\u003e\n\nfirst\n\nsecond\u003c|eot_id|\u003e\u003c|start_header_id|\u003eassistant\u003c|end_header_id|\u003e\n\n"
+ },
+ {
+  "name": "magicoder.gotmpl/ssua",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- continue }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}@@ Instruction\n{{- else if eq .Role \"assistant\" }}@@ Response\n{{- end }}\n{{ .Content }}\n\n{{ end }}@@ Response\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "sys one\n\nsys two\n\n@@ Instruction\nq\n\n@@ Response\na\n\n@@ Response\n"
+ },
+ {
+  "name": "magicoder.gotmpl/suau",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- continue }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}@@ Instruction\n{{- else if eq .Role \"assistant\" }}@@ Response\n{{- end }}\n{{ .Content }}\n\n{{ end }}@@ Response\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "You are a helpful assistant.\n\n@@ Instruction\nHello, how are you?\n\n@@ Response\nI'm doing great. How can I help you today?\n\n@@ Instruction\nI'd like to show off how chat templating works!\n\n@@ Response\n"
+ },
+ {
+  "name": "magicoder.gotmpl/u",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- continue }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}@@ Instruction\n{{- else if eq .Role \"assistant\" }}@@ Response\n{{- end }}\n{{ .Content }}\n\n{{ end }}@@ Response\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "@@ Instruction\nHello, how are you?\n\n@@ Response\n"
+ },
+ {
+  "name": "magicoder.gotmpl/ua",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- continue }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}@@ Instruction\n{{- else if eq .Role \"assistant\" }}@@ Response\n{{- end }}\n{{ .Content }}\n\n{{ end }}@@ Response\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "@@ Instruction\nq\n\n@@ Response\na\n\n@@ Response\n"
+ },
+ {
+  "name": "magicoder.gotmpl/uau",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- continue }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}@@ Instruction\n{{- else if eq .Role \"assistant\" }}@@ Response\n{{- end }}\n{{ .Content }}\n\n{{ end }}@@ Response\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "@@ Instruction\nHello, how are you?\n\n@@ Response\nI'm doing great. How can I help you today?\n\n@@ Instruction\nI'd like to show off how chat templating works!\n\n@@ Response\n"
+ },
+ {
+  "name": "magicoder.gotmpl/uu",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- continue }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}@@ Instruction\n{{- else if eq .Role \"assistant\" }}@@ Response\n{{- end }}\n{{ .Content }}\n\n{{ end }}@@ Response\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "@@ Instruction\nfirst\n\nsecond\n\n@@ Response\n"
+ },
+ {
+  "name": "mistral-instruct.gotmpl/ssua",
+  "template": "[INST] {{ range $index, $_ := .Messages }}\n{{- if eq .Role \"system\" }}{{ .Content }}\n\n{{ else if eq .Role \"user\" }}{{ .Content }}[/INST]\n{{- else if eq .Role \"assistant\" }} {{ .Content }}\u003c/s\u003e[INST] {{ end }}\n{{- end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "[INST] sys one\n\nsys two\n\nq[/INST] a\u003c/s\u003e[INST] "
+ },
+ {
+  "name": "mistral-instruct.gotmpl/suau",
+  "template": "[INST] {{ range $index, $_ := .Messages }}\n{{- if eq .Role \"system\" }}{{ .Content }}\n\n{{ else if eq .Role \"user\" }}{{ .Content }}[/INST]\n{{- else if eq .Role \"assistant\" }} {{ .Content }}\u003c/s\u003e[INST] {{ end }}\n{{- end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "[INST] You are a helpful assistant.\n\nHello, how are you?[/INST] I'm doing great. How can I help you today?\u003c/s\u003e[INST] I'd like to show off how chat templating works![/INST]"
+ },
+ {
+  "name": "mistral-instruct.gotmpl/u",
+  "template": "[INST] {{ range $index, $_ := .Messages }}\n{{- if eq .Role \"system\" }}{{ .Content }}\n\n{{ else if eq .Role \"user\" }}{{ .Content }}[/INST]\n{{- else if eq .Role \"assistant\" }} {{ .Content }}\u003c/s\u003e[INST] {{ end }}\n{{- end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "[INST] Hello, how are you?[/INST]"
+ },
+ {
+  "name": "mistral-instruct.gotmpl/ua",
+  "template": "[INST] {{ range $index, $_ := .Messages }}\n{{- if eq .Role \"system\" }}{{ .Content }}\n\n{{ else if eq .Role \"user\" }}{{ .Content }}[/INST]\n{{- else if eq .Role \"assistant\" }} {{ .Content }}\u003c/s\u003e[INST] {{ end }}\n{{- end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "[INST] q[/INST] a\u003c/s\u003e[INST] "
+ },
+ {
+  "name": "mistral-instruct.gotmpl/uau",
+  "template": "[INST] {{ range $index, $_ := .Messages }}\n{{- if eq .Role \"system\" }}{{ .Content }}\n\n{{ else if eq .Role \"user\" }}{{ .Content }}[/INST]\n{{- else if eq .Role \"assistant\" }} {{ .Content }}\u003c/s\u003e[INST] {{ end }}\n{{- end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "[INST] Hello, how are you?[/INST] I'm doing great. How can I help you today?\u003c/s\u003e[INST] I'd like to show off how chat templating works![/INST]"
+ },
+ {
+  "name": "mistral-instruct.gotmpl/uu",
+  "template": "[INST] {{ range $index, $_ := .Messages }}\n{{- if eq .Role \"system\" }}{{ .Content }}\n\n{{ else if eq .Role \"user\" }}{{ .Content }}[/INST]\n{{- else if eq .Role \"assistant\" }} {{ .Content }}\u003c/s\u003e[INST] {{ end }}\n{{- end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "[INST] first\n\nsecond[/INST]"
+ },
+ {
+  "name": "openchat.gotmpl/ssua",
+  "template": "{{- range .Messages }}GPT4 Correct\n{{- if eq .Role \"system\" }} System:\n{{- else if eq .Role \"user\" }} User:\n{{- else if eq .Role \"assistant\" }} Assistant:\n{{- end }} {{ .Content }}\u003c|end_of_turn|\u003e\n{{- end }}GPT4 Correct Assistant:",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "GPT4 Correct System: sys one\n\nsys two\u003c|end_of_turn|\u003eGPT4 Correct User: q\u003c|end_of_turn|\u003eGPT4 Correct Assistant: a\u003c|end_of_turn|\u003eGPT4 Correct Assistant:"
+ },
+ {
+  "name": "openchat.gotmpl/suau",
+  "template": "{{- range .Messages }}GPT4 Correct\n{{- if eq .Role \"system\" }} System:\n{{- else if eq .Role \"user\" }} User:\n{{- else if eq .Role \"assistant\" }} Assistant:\n{{- end }} {{ .Content }}\u003c|end_of_turn|\u003e\n{{- end }}GPT4 Correct Assistant:",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "GPT4 Correct System: You are a helpful assistant.\u003c|end_of_turn|\u003eGPT4 Correct User: Hello, how are you?\u003c|end_of_turn|\u003eGPT4 Correct Assistant: I'm doing great. How can I help you today?\u003c|end_of_turn|\u003eGPT4 Correct User: I'd like to show off how chat templating works!\u003c|end_of_turn|\u003eGPT4 Correct Assistant:"
+ },
+ {
+  "name": "openchat.gotmpl/u",
+  "template": "{{- range .Messages }}GPT4 Correct\n{{- if eq .Role \"system\" }} System:\n{{- else if eq .Role \"user\" }} User:\n{{- else if eq .Role \"assistant\" }} Assistant:\n{{- end }} {{ .Content }}\u003c|end_of_turn|\u003e\n{{- end }}GPT4 Correct Assistant:",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "GPT4 Correct User: Hello, how are you?\u003c|end_of_turn|\u003eGPT4 Correct Assistant:"
+ },
+ {
+  "name": "openchat.gotmpl/ua",
+  "template": "{{- range .Messages }}GPT4 Correct\n{{- if eq .Role \"system\" }} System:\n{{- else if eq .Role \"user\" }} User:\n{{- else if eq .Role \"assistant\" }} Assistant:\n{{- end }} {{ .Content }}\u003c|end_of_turn|\u003e\n{{- end }}GPT4 Correct Assistant:",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "GPT4 Correct User: q\u003c|end_of_turn|\u003eGPT4 Correct Assistant: a\u003c|end_of_turn|\u003eGPT4 Correct Assistant:"
+ },
+ {
+  "name": "openchat.gotmpl/uau",
+  "template": "{{- range .Messages }}GPT4 Correct\n{{- if eq .Role \"system\" }} System:\n{{- else if eq .Role \"user\" }} User:\n{{- else if eq .Role \"assistant\" }} Assistant:\n{{- end }} {{ .Content }}\u003c|end_of_turn|\u003e\n{{- end }}GPT4 Correct Assistant:",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "GPT4 Correct User: Hello, how are you?\u003c|end_of_turn|\u003eGPT4 Correct Assistant: I'm doing great. How can I help you today?\u003c|end_of_turn|\u003eGPT4 Correct User: I'd like to show off how chat templating works!\u003c|end_of_turn|\u003eGPT4 Correct Assistant:"
+ },
+ {
+  "name": "openchat.gotmpl/uu",
+  "template": "{{- range .Messages }}GPT4 Correct\n{{- if eq .Role \"system\" }} System:\n{{- else if eq .Role \"user\" }} User:\n{{- else if eq .Role \"assistant\" }} Assistant:\n{{- end }} {{ .Content }}\u003c|end_of_turn|\u003e\n{{- end }}GPT4 Correct Assistant:",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "GPT4 Correct User: first\n\nsecond\u003c|end_of_turn|\u003eGPT4 Correct Assistant:"
+ },
+ {
+  "name": "phi-3.gotmpl/ssua",
+  "template": "{{- range .Messages }}\u003c|{{ .Role }}|\u003e\n{{ .Content }}\u003c|end|\u003e\n{{ end }}\u003c|assistant|\u003e\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003c|system|\u003e\nsys one\n\nsys two\u003c|end|\u003e\n\u003c|user|\u003e\nq\u003c|end|\u003e\n\u003c|assistant|\u003e\na\u003c|end|\u003e\n\u003c|assistant|\u003e\n"
+ },
+ {
+  "name": "phi-3.gotmpl/suau",
+  "template": "{{- range .Messages }}\u003c|{{ .Role }}|\u003e\n{{ .Content }}\u003c|end|\u003e\n{{ end }}\u003c|assistant|\u003e\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003c|system|\u003e\nYou are a helpful assistant.\u003c|end|\u003e\n\u003c|user|\u003e\nHello, how are you?\u003c|end|\u003e\n\u003c|assistant|\u003e\nI'm doing great. How can I help you today?\u003c|end|\u003e\n\u003c|user|\u003e\nI'd like to show off how chat templating works!\u003c|end|\u003e\n\u003c|assistant|\u003e\n"
+ },
+ {
+  "name": "phi-3.gotmpl/u",
+  "template": "{{- range .Messages }}\u003c|{{ .Role }}|\u003e\n{{ .Content }}\u003c|end|\u003e\n{{ end }}\u003c|assistant|\u003e\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "\u003c|user|\u003e\nHello, how are you?\u003c|end|\u003e\n\u003c|assistant|\u003e\n"
+ },
+ {
+  "name": "phi-3.gotmpl/ua",
+  "template": "{{- range .Messages }}\u003c|{{ .Role }}|\u003e\n{{ .Content }}\u003c|end|\u003e\n{{ end }}\u003c|assistant|\u003e\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003c|user|\u003e\nq\u003c|end|\u003e\n\u003c|assistant|\u003e\na\u003c|end|\u003e\n\u003c|assistant|\u003e\n"
+ },
+ {
+  "name": "phi-3.gotmpl/uau",
+  "template": "{{- range .Messages }}\u003c|{{ .Role }}|\u003e\n{{ .Content }}\u003c|end|\u003e\n{{ end }}\u003c|assistant|\u003e\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003c|user|\u003e\nHello, how are you?\u003c|end|\u003e\n\u003c|assistant|\u003e\nI'm doing great. How can I help you today?\u003c|end|\u003e\n\u003c|user|\u003e\nI'd like to show off how chat templating works!\u003c|end|\u003e\n\u003c|assistant|\u003e\n"
+ },
+ {
+  "name": "phi-3.gotmpl/uu",
+  "template": "{{- range .Messages }}\u003c|{{ .Role }}|\u003e\n{{ .Content }}\u003c|end|\u003e\n{{ end }}\u003c|assistant|\u003e\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "\u003c|user|\u003e\nfirst\n\nsecond\u003c|end|\u003e\n\u003c|assistant|\u003e\n"
+ },
+ {
+  "name": "solar-instruct.gotmpl/ssua",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}### System:\n{{- else if eq .Role \"user\" }}### User:\n{{- else if eq .Role \"assistant\" }}### Assistant:\n{{ .Content }}\u003c/s\u003e\n\n{{ continue }}\n{{- end }}\n{{ .Content }}\n\n{{ end }}### Assistant:\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "### System:\nsys one\n\nsys two\n\n### User:\nq\n\n### Assistant:\na\u003c/s\u003e\n\n### Assistant:\n"
+ },
+ {
+  "name": "solar-instruct.gotmpl/suau",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}### System:\n{{- else if eq .Role \"user\" }}### User:\n{{- else if eq .Role \"assistant\" }}### Assistant:\n{{ .Content }}\u003c/s\u003e\n\n{{ continue }}\n{{- end }}\n{{ .Content }}\n\n{{ end }}### Assistant:\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "### System:\nYou are a helpful assistant.\n\n### User:\nHello, how are you?\n\n### Assistant:\nI'm doing great. How can I help you today?\u003c/s\u003e\n\n### User:\nI'd like to show off how chat templating works!\n\n### Assistant:\n"
+ },
+ {
+  "name": "solar-instruct.gotmpl/u",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}### System:\n{{- else if eq .Role \"user\" }}### User:\n{{- else if eq .Role \"assistant\" }}### Assistant:\n{{ .Content }}\u003c/s\u003e\n\n{{ continue }}\n{{- end }}\n{{ .Content }}\n\n{{ end }}### Assistant:\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "### User:\nHello, how are you?\n\n### Assistant:\n"
+ },
+ {
+  "name": "solar-instruct.gotmpl/ua",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}### System:\n{{- else if eq .Role \"user\" }}### User:\n{{- else if eq .Role \"assistant\" }}### Assistant:\n{{ .Content }}\u003c/s\u003e\n\n{{ continue }}\n{{- end }}\n{{ .Content }}\n\n{{ end }}### Assistant:\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "### User:\nq\n\n### Assistant:\na\u003c/s\u003e\n\n### Assistant:\n"
+ },
+ {
+  "name": "solar-instruct.gotmpl/uau",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}### System:\n{{- else if eq .Role \"user\" }}### User:\n{{- else if eq .Role \"assistant\" }}### Assistant:\n{{ .Content }}\u003c/s\u003e\n\n{{ continue }}\n{{- end }}\n{{ .Content }}\n\n{{ end }}### Assistant:\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "### User:\nHello, how are you?\n\n### Assistant:\nI'm doing great. How can I help you today?\u003c/s\u003e\n\n### User:\nI'd like to show off how chat templating works!\n\n### Assistant:\n"
+ },
+ {
+  "name": "solar-instruct.gotmpl/uu",
+  "template": "{{- range .Messages }}\n{{- if eq .Role \"system\" }}### System:\n{{- else if eq .Role \"user\" }}### User:\n{{- else if eq .Role \"assistant\" }}### Assistant:\n{{ .Content }}\u003c/s\u003e\n\n{{ continue }}\n{{- end }}\n{{ .Content }}\n\n{{ end }}### Assistant:\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "### User:\nfirst\n\nsecond\n\n### Assistant:\n"
+ },
+ {
+  "name": "starcoder2-instruct.gotmpl/ssua",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}### Instruction\n{{ .Content }}\n\n{{ else if eq .Role \"assistant\" }}### Response\n{{ .Content }}\u003c|endoftext|\u003e\n\n{{ end }}\n{{- end }}### Response\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "sys one\n\nsys two\n\n### Instruction\nq\n\n### Response\na\u003c|endoftext|\u003e\n\n### Response\n"
+ },
+ {
+  "name": "starcoder2-instruct.gotmpl/suau",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}### Instruction\n{{ .Content }}\n\n{{ else if eq .Role \"assistant\" }}### Response\n{{ .Content }}\u003c|endoftext|\u003e\n\n{{ end }}\n{{- end }}### Response\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "You are a helpful assistant.\n\n### Instruction\nHello, how are you?\n\n### Response\nI'm doing great. How can I help you today?\u003c|endoftext|\u003e\n\n### Instruction\nI'd like to show off how chat templating works!\n\n### Response\n"
+ },
+ {
+  "name": "starcoder2-instruct.gotmpl/u",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}### Instruction\n{{ .Content }}\n\n{{ else if eq .Role \"assistant\" }}### Response\n{{ .Content }}\u003c|endoftext|\u003e\n\n{{ end }}\n{{- end }}### Response\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "### Instruction\nHello, how are you?\n\n### Response\n"
+ },
+ {
+  "name": "starcoder2-instruct.gotmpl/ua",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}### Instruction\n{{ .Content }}\n\n{{ else if eq .Role \"assistant\" }}### Response\n{{ .Content }}\u003c|endoftext|\u003e\n\n{{ end }}\n{{- end }}### Response\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "### Instruction\nq\n\n### Response\na\u003c|endoftext|\u003e\n\n### Response\n"
+ },
+ {
+  "name": "starcoder2-instruct.gotmpl/uau",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}### Instruction\n{{ .Content }}\n\n{{ else if eq .Role \"assistant\" }}### Response\n{{ .Content }}\u003c|endoftext|\u003e\n\n{{ end }}\n{{- end }}### Response\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "### Instruction\nHello, how are you?\n\n### Response\nI'm doing great. How can I help you today?\u003c|endoftext|\u003e\n\n### Instruction\nI'd like to show off how chat templating works!\n\n### Response\n"
+ },
+ {
+  "name": "starcoder2-instruct.gotmpl/uu",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}### Instruction\n{{ .Content }}\n\n{{ else if eq .Role \"assistant\" }}### Response\n{{ .Content }}\u003c|endoftext|\u003e\n\n{{ end }}\n{{- end }}### Response\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "### Instruction\nfirst\n\nsecond\n\n### Response\n"
+ },
+ {
+  "name": "vicuna.gotmpl/ssua",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}USER: {{ .Content }}\n{{ else if eq .Role \"assistant\" }}ASSISTANT: {{ .Content }}\u003c/s\u003e\n{{ end }}\n{{- end }}ASSISTANT:",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "sys one\n\nsys two\n\nUSER: q\nASSISTANT: a\u003c/s\u003e\nASSISTANT:"
+ },
+ {
+  "name": "vicuna.gotmpl/suau",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}USER: {{ .Content }}\n{{ else if eq .Role \"assistant\" }}ASSISTANT: {{ .Content }}\u003c/s\u003e\n{{ end }}\n{{- end }}ASSISTANT:",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "You are a helpful assistant.\n\nUSER: Hello, how are you?\nASSISTANT: I'm doing great. How can I help you today?\u003c/s\u003e\nUSER: I'd like to show off how chat templating works!\nASSISTANT:"
+ },
+ {
+  "name": "vicuna.gotmpl/u",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}USER: {{ .Content }}\n{{ else if eq .Role \"assistant\" }}ASSISTANT: {{ .Content }}\u003c/s\u003e\n{{ end }}\n{{- end }}ASSISTANT:",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "USER: Hello, how are you?\nASSISTANT:"
+ },
+ {
+  "name": "vicuna.gotmpl/ua",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}USER: {{ .Content }}\n{{ else if eq .Role \"assistant\" }}ASSISTANT: {{ .Content }}\u003c/s\u003e\n{{ end }}\n{{- end }}ASSISTANT:",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "USER: q\nASSISTANT: a\u003c/s\u003e\nASSISTANT:"
+ },
+ {
+  "name": "vicuna.gotmpl/uau",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}USER: {{ .Content }}\n{{ else if eq .Role \"assistant\" }}ASSISTANT: {{ .Content }}\u003c/s\u003e\n{{ end }}\n{{- end }}ASSISTANT:",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "USER: Hello, how are you?\nASSISTANT: I'm doing great. How can I help you today?\u003c/s\u003e\nUSER: I'd like to show off how chat templating works!\nASSISTANT:"
+ },
+ {
+  "name": "vicuna.gotmpl/uu",
+  "template": "{{- $system := \"\" }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- if not $system }}{{ $system = .Content }}\n{{- else }}{{ $system = printf \"%s\\n\\n%s\" $system .Content }}\n{{- end }}\n{{- else if eq .Role \"user\" }}\n{{- if $system }}{{ $system }}\n\n{{ $system = \"\" }}\n{{- end }}USER: {{ .Content }}\n{{ else if eq .Role \"assistant\" }}ASSISTANT: {{ .Content }}\u003c/s\u003e\n{{ end }}\n{{- end }}ASSISTANT:",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "USER: first\n\nsecond\nASSISTANT:"
+ },
+ {
+  "name": "zephyr.gotmpl/ssua",
+  "template": "{{- range .Messages }}\u003c|{{ .Role }}|\u003e\n{{ .Content }}\u003c/s\u003e\n{{ end }}\u003c|assistant|\u003e\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003c|system|\u003e\nsys one\n\nsys two\u003c/s\u003e\n\u003c|user|\u003e\nq\u003c/s\u003e\n\u003c|assistant|\u003e\na\u003c/s\u003e\n\u003c|assistant|\u003e\n"
+ },
+ {
+  "name": "zephyr.gotmpl/suau",
+  "template": "{{- range .Messages }}\u003c|{{ .Role }}|\u003e\n{{ .Content }}\u003c/s\u003e\n{{ end }}\u003c|assistant|\u003e\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003c|system|\u003e\nYou are a helpful assistant.\u003c/s\u003e\n\u003c|user|\u003e\nHello, how are you?\u003c/s\u003e\n\u003c|assistant|\u003e\nI'm doing great. How can I help you today?\u003c/s\u003e\n\u003c|user|\u003e\nI'd like to show off how chat templating works!\u003c/s\u003e\n\u003c|assistant|\u003e\n"
+ },
+ {
+  "name": "zephyr.gotmpl/u",
+  "template": "{{- range .Messages }}\u003c|{{ .Role }}|\u003e\n{{ .Content }}\u003c/s\u003e\n{{ end }}\u003c|assistant|\u003e\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "\u003c|user|\u003e\nHello, how are you?\u003c/s\u003e\n\u003c|assistant|\u003e\n"
+ },
+ {
+  "name": "zephyr.gotmpl/ua",
+  "template": "{{- range .Messages }}\u003c|{{ .Role }}|\u003e\n{{ .Content }}\u003c/s\u003e\n{{ end }}\u003c|assistant|\u003e\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003c|user|\u003e\nq\u003c/s\u003e\n\u003c|assistant|\u003e\na\u003c/s\u003e\n\u003c|assistant|\u003e\n"
+ },
+ {
+  "name": "zephyr.gotmpl/uau",
+  "template": "{{- range .Messages }}\u003c|{{ .Role }}|\u003e\n{{ .Content }}\u003c/s\u003e\n{{ end }}\u003c|assistant|\u003e\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003c|user|\u003e\nHello, how are you?\u003c/s\u003e\n\u003c|assistant|\u003e\nI'm doing great. How can I help you today?\u003c/s\u003e\n\u003c|user|\u003e\nI'd like to show off how chat templating works!\u003c/s\u003e\n\u003c|assistant|\u003e\n"
+ },
+ {
+  "name": "zephyr.gotmpl/uu",
+  "template": "{{- range .Messages }}\u003c|{{ .Role }}|\u003e\n{{ .Content }}\u003c/s\u003e\n{{ end }}\u003c|assistant|\u003e\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "\u003c|user|\u003e\nfirst\n\nsecond\u003c/s\u003e\n\u003c|assistant|\u003e\n"
+ },
+ {
+  "name": "legacy-llama2/ssua",
+  "template": "{{ if .System }}\u003c\u003cSYS\u003e\u003e{{ .System }}\u003c\u003c/SYS\u003e\u003e\n{{ end }}{{ .Prompt }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003c\u003cSYS\u003e\u003esys one\n\nsys two\u003c\u003c/SYS\u003e\u003e\nqa"
+ },
+ {
+  "name": "legacy-llama2/suau",
+  "template": "{{ if .System }}\u003c\u003cSYS\u003e\u003e{{ .System }}\u003c\u003c/SYS\u003e\u003e\n{{ end }}{{ .Prompt }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003c\u003cSYS\u003e\u003eYou are a helpful assistant.\u003c\u003c/SYS\u003e\u003e\nHello, how are you?I'm doing great. How can I help you today?I'd like to show off how chat templating works!"
+ },
+ {
+  "name": "legacy-llama2/u",
+  "template": "{{ if .System }}\u003c\u003cSYS\u003e\u003e{{ .System }}\u003c\u003c/SYS\u003e\u003e\n{{ end }}{{ .Prompt }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "Hello, how are you?"
+ },
+ {
+  "name": "legacy-llama2/ua",
+  "template": "{{ if .System }}\u003c\u003cSYS\u003e\u003e{{ .System }}\u003c\u003c/SYS\u003e\u003e\n{{ end }}{{ .Prompt }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "qa"
+ },
+ {
+  "name": "legacy-llama2/uau",
+  "template": "{{ if .System }}\u003c\u003cSYS\u003e\u003e{{ .System }}\u003c\u003c/SYS\u003e\u003e\n{{ end }}{{ .Prompt }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "Hello, how are you?I'm doing great. How can I help you today?I'd like to show off how chat templating works!"
+ },
+ {
+  "name": "legacy-llama2/uu",
+  "template": "{{ if .System }}\u003c\u003cSYS\u003e\u003e{{ .System }}\u003c\u003c/SYS\u003e\u003e\n{{ end }}{{ .Prompt }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "first\n\nsecond"
+ },
+ {
+  "name": "legacy-mistral/ssua",
+  "template": "[INST] {{ if .System }}{{ .System }}\n\n{{ end }}{{ .Prompt }}[/INST] {{ .Response }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "[INST] sys one\n\nsys two\n\nq[/INST] a"
+ },
+ {
+  "name": "legacy-mistral/suau",
+  "template": "[INST] {{ if .System }}{{ .System }}\n\n{{ end }}{{ .Prompt }}[/INST] {{ .Response }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "[INST] You are a helpful assistant.\n\nHello, how are you?[/INST] I'm doing great. How can I help you today?[INST] I'd like to show off how chat templating works![/INST] "
+ },
+ {
+  "name": "legacy-mistral/u",
+  "template": "[INST] {{ if .System }}{{ .System }}\n\n{{ end }}{{ .Prompt }}[/INST] {{ .Response }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "[INST] Hello, how are you?[/INST] "
+ },
+ {
+  "name": "legacy-mistral/ua",
+  "template": "[INST] {{ if .System }}{{ .System }}\n\n{{ end }}{{ .Prompt }}[/INST] {{ .Response }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "[INST] q[/INST] a"
+ },
+ {
+  "name": "legacy-mistral/uau",
+  "template": "[INST] {{ if .System }}{{ .System }}\n\n{{ end }}{{ .Prompt }}[/INST] {{ .Response }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "[INST] Hello, how are you?[/INST] I'm doing great. How can I help you today?[INST] I'd like to show off how chat templating works![/INST] "
+ },
+ {
+  "name": "legacy-mistral/uu",
+  "template": "[INST] {{ if .System }}{{ .System }}\n\n{{ end }}{{ .Prompt }}[/INST] {{ .Response }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "[INST] first\n\nsecond[/INST] "
+ },
+ {
+  "name": "legacy-noresp/ssua",
+  "template": "[INST] {{ if .System }}{{ .System }}\n\n{{ end }}{{ .Prompt }}[/INST] ",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "[INST] sys one\n\nsys two\n\nq[/INST] a"
+ },
+ {
+  "name": "legacy-noresp/suau",
+  "template": "[INST] {{ if .System }}{{ .System }}\n\n{{ end }}{{ .Prompt }}[/INST] ",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "[INST] You are a helpful assistant.\n\nHello, how are you?[/INST] I'm doing great. How can I help you today?[INST] I'd like to show off how chat templating works![/INST] "
+ },
+ {
+  "name": "legacy-noresp/u",
+  "template": "[INST] {{ if .System }}{{ .System }}\n\n{{ end }}{{ .Prompt }}[/INST] ",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "[INST] Hello, how are you?[/INST] "
+ },
+ {
+  "name": "legacy-noresp/ua",
+  "template": "[INST] {{ if .System }}{{ .System }}\n\n{{ end }}{{ .Prompt }}[/INST] ",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "[INST] q[/INST] a"
+ },
+ {
+  "name": "legacy-noresp/uau",
+  "template": "[INST] {{ if .System }}{{ .System }}\n\n{{ end }}{{ .Prompt }}[/INST] ",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "[INST] Hello, how are you?[/INST] I'm doing great. How can I help you today?[INST] I'd like to show off how chat templating works![/INST] "
+ },
+ {
+  "name": "legacy-noresp/uu",
+  "template": "[INST] {{ if .System }}{{ .System }}\n\n{{ end }}{{ .Prompt }}[/INST] ",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "[INST] first\n\nsecond[/INST] "
+ },
+ {
+  "name": "msgs-and-or-not/ssua",
+  "template": "{{- range .Messages }}{{ if and (ne .Role \"system\") (not (eq .Content \"\")) }}{{ .Role }}{{ else if or (eq .Role \"system\") false }}SYS{{ end }}.{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "SYS.user.assistant."
+ },
+ {
+  "name": "msgs-and-or-not/suau",
+  "template": "{{- range .Messages }}{{ if and (ne .Role \"system\") (not (eq .Content \"\")) }}{{ .Role }}{{ else if or (eq .Role \"system\") false }}SYS{{ end }}.{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "SYS.user.assistant.user."
+ },
+ {
+  "name": "msgs-and-or-not/u",
+  "template": "{{- range .Messages }}{{ if and (ne .Role \"system\") (not (eq .Content \"\")) }}{{ .Role }}{{ else if or (eq .Role \"system\") false }}SYS{{ end }}.{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "user."
+ },
+ {
+  "name": "msgs-and-or-not/ua",
+  "template": "{{- range .Messages }}{{ if and (ne .Role \"system\") (not (eq .Content \"\")) }}{{ .Role }}{{ else if or (eq .Role \"system\") false }}SYS{{ end }}.{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "user.assistant."
+ },
+ {
+  "name": "msgs-and-or-not/uau",
+  "template": "{{- range .Messages }}{{ if and (ne .Role \"system\") (not (eq .Content \"\")) }}{{ .Role }}{{ else if or (eq .Role \"system\") false }}SYS{{ end }}.{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "user.assistant.user."
+ },
+ {
+  "name": "msgs-and-or-not/uu",
+  "template": "{{- range .Messages }}{{ if and (ne .Role \"system\") (not (eq .Content \"\")) }}{{ .Role }}{{ else if or (eq .Role \"system\") false }}SYS{{ end }}.{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "user."
+ },
+ {
+  "name": "msgs-break/ssua",
+  "template": "{{- range .Messages }}{{ if eq .Role \"assistant\" }}{{ break }}{{ end }}{{ .Role }},{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "system,user,"
+ },
+ {
+  "name": "msgs-break/suau",
+  "template": "{{- range .Messages }}{{ if eq .Role \"assistant\" }}{{ break }}{{ end }}{{ .Role }},{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "system,user,"
+ },
+ {
+  "name": "msgs-break/u",
+  "template": "{{- range .Messages }}{{ if eq .Role \"assistant\" }}{{ break }}{{ end }}{{ .Role }},{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "user,"
+ },
+ {
+  "name": "msgs-break/ua",
+  "template": "{{- range .Messages }}{{ if eq .Role \"assistant\" }}{{ break }}{{ end }}{{ .Role }},{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "user,"
+ },
+ {
+  "name": "msgs-break/uau",
+  "template": "{{- range .Messages }}{{ if eq .Role \"assistant\" }}{{ break }}{{ end }}{{ .Role }},{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "user,"
+ },
+ {
+  "name": "msgs-break/uu",
+  "template": "{{- range .Messages }}{{ if eq .Role \"assistant\" }}{{ break }}{{ end }}{{ .Role }},{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "user,"
+ },
+ {
+  "name": "msgs-comment/ssua",
+  "template": "a{{/* note */}}b{{- /* trimmed */ -}}  c{{ range .Messages }}{{ .Role }}{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "abcsystemuserassistant"
+ },
+ {
+  "name": "msgs-comment/suau",
+  "template": "a{{/* note */}}b{{- /* trimmed */ -}}  c{{ range .Messages }}{{ .Role }}{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "abcsystemuserassistantuser"
+ },
+ {
+  "name": "msgs-comment/u",
+  "template": "a{{/* note */}}b{{- /* trimmed */ -}}  c{{ range .Messages }}{{ .Role }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "abcuser"
+ },
+ {
+  "name": "msgs-comment/ua",
+  "template": "a{{/* note */}}b{{- /* trimmed */ -}}  c{{ range .Messages }}{{ .Role }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "abcuserassistant"
+ },
+ {
+  "name": "msgs-comment/uau",
+  "template": "a{{/* note */}}b{{- /* trimmed */ -}}  c{{ range .Messages }}{{ .Role }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "abcuserassistantuser"
+ },
+ {
+  "name": "msgs-comment/uu",
+  "template": "a{{/* note */}}b{{- /* trimmed */ -}}  c{{ range .Messages }}{{ .Role }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "abcuser"
+ },
+ {
+  "name": "msgs-eq-multi/ssua",
+  "template": "{{- range .Messages }}{{ if eq .Role \"user\" \"assistant\" }}U/A{{ else }}other{{ end }} {{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "other U/A U/A "
+ },
+ {
+  "name": "msgs-eq-multi/suau",
+  "template": "{{- range .Messages }}{{ if eq .Role \"user\" \"assistant\" }}U/A{{ else }}other{{ end }} {{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "other U/A U/A U/A "
+ },
+ {
+  "name": "msgs-eq-multi/u",
+  "template": "{{- range .Messages }}{{ if eq .Role \"user\" \"assistant\" }}U/A{{ else }}other{{ end }} {{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "U/A "
+ },
+ {
+  "name": "msgs-eq-multi/ua",
+  "template": "{{- range .Messages }}{{ if eq .Role \"user\" \"assistant\" }}U/A{{ else }}other{{ end }} {{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "U/A U/A "
+ },
+ {
+  "name": "msgs-eq-multi/uau",
+  "template": "{{- range .Messages }}{{ if eq .Role \"user\" \"assistant\" }}U/A{{ else }}other{{ end }} {{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "U/A U/A U/A "
+ },
+ {
+  "name": "msgs-eq-multi/uu",
+  "template": "{{- range .Messages }}{{ if eq .Role \"user\" \"assistant\" }}U/A{{ else }}other{{ end }} {{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "U/A "
+ },
+ {
+  "name": "msgs-indent/ssua",
+  "template": "A\n    {{ if .System }}S{{ end }}\n    {{ range .Messages }}[{{ .Role }}]{{ end }}\n  {{ if .System }}tail{{ end }}\nB\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "A\n    S\n    [system][user][assistant]\n  tail\nB\n"
+ },
+ {
+  "name": "msgs-indent/suau",
+  "template": "A\n    {{ if .System }}S{{ end }}\n    {{ range .Messages }}[{{ .Role }}]{{ end }}\n  {{ if .System }}tail{{ end }}\nB\n",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "A\n    S\n    [system][user][assistant][user]\n  tail\nB\n"
+ },
+ {
+  "name": "msgs-indent/u",
+  "template": "A\n    {{ if .System }}S{{ end }}\n    {{ range .Messages }}[{{ .Role }}]{{ end }}\n  {{ if .System }}tail{{ end }}\nB\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "A\n    \n    [user]\n  \nB\n"
+ },
+ {
+  "name": "msgs-indent/ua",
+  "template": "A\n    {{ if .System }}S{{ end }}\n    {{ range .Messages }}[{{ .Role }}]{{ end }}\n  {{ if .System }}tail{{ end }}\nB\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "A\n    \n    [user][assistant]\n  \nB\n"
+ },
+ {
+  "name": "msgs-indent/uau",
+  "template": "A\n    {{ if .System }}S{{ end }}\n    {{ range .Messages }}[{{ .Role }}]{{ end }}\n  {{ if .System }}tail{{ end }}\nB\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "A\n    \n    [user][assistant][user]\n  \nB\n"
+ },
+ {
+  "name": "msgs-indent/uu",
+  "template": "A\n    {{ if .System }}S{{ end }}\n    {{ range .Messages }}[{{ .Role }}]{{ end }}\n  {{ if .System }}tail{{ end }}\nB\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "A\n    \n    [user]\n  \nB\n"
+ },
+ {
+  "name": "msgs-index/ssua",
+  "template": "{{- range $i, $m := .Messages }}{{ if $i }},{{ end }}{{ $i }}={{ $m.Role }}{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "0=system,1=user,2=assistant"
+ },
+ {
+  "name": "msgs-index/suau",
+  "template": "{{- range $i, $m := .Messages }}{{ if $i }},{{ end }}{{ $i }}={{ $m.Role }}{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "0=system,1=user,2=assistant,3=user"
+ },
+ {
+  "name": "msgs-index/u",
+  "template": "{{- range $i, $m := .Messages }}{{ if $i }},{{ end }}{{ $i }}={{ $m.Role }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "0=user"
+ },
+ {
+  "name": "msgs-index/ua",
+  "template": "{{- range $i, $m := .Messages }}{{ if $i }},{{ end }}{{ $i }}={{ $m.Role }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "0=user,1=assistant"
+ },
+ {
+  "name": "msgs-index/uau",
+  "template": "{{- range $i, $m := .Messages }}{{ if $i }},{{ end }}{{ $i }}={{ $m.Role }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "0=user,1=assistant,2=user"
+ },
+ {
+  "name": "msgs-index/uu",
+  "template": "{{- range $i, $m := .Messages }}{{ if $i }},{{ end }}{{ $i }}={{ $m.Role }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "0=user"
+ },
+ {
+  "name": "msgs-json/ssua",
+  "template": "{{- range .Messages }}{{ json .Content }}{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\"sys one\\n\\nsys two\"\"q\"\"a\""
+ },
+ {
+  "name": "msgs-json/suau",
+  "template": "{{- range .Messages }}{{ json .Content }}{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\"You are a helpful assistant.\"\"Hello, how are you?\"\"I'm doing great. How can I help you today?\"\"I'd like to show off how chat templating works!\""
+ },
+ {
+  "name": "msgs-json/u",
+  "template": "{{- range .Messages }}{{ json .Content }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "\"Hello, how are you?\""
+ },
+ {
+  "name": "msgs-json/ua",
+  "template": "{{- range .Messages }}{{ json .Content }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\"q\"\"a\""
+ },
+ {
+  "name": "msgs-json/uau",
+  "template": "{{- range .Messages }}{{ json .Content }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\"Hello, how are you?\"\"I'm doing great. How can I help you today?\"\"I'd like to show off how chat templating works!\""
+ },
+ {
+  "name": "msgs-json/uu",
+  "template": "{{- range .Messages }}{{ json .Content }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "\"first\\n\\nsecond\""
+ },
+ {
+  "name": "msgs-literal/ssua",
+  "template": "{{ \"{{\" }}x{{ \"}}\" }} {{ range .Messages }}{{ .Content }}{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "{{x}} sys one\n\nsys twoqa"
+ },
+ {
+  "name": "msgs-literal/suau",
+  "template": "{{ \"{{\" }}x{{ \"}}\" }} {{ range .Messages }}{{ .Content }}{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "{{x}} You are a helpful assistant.Hello, how are you?I'm doing great. How can I help you today?I'd like to show off how chat templating works!"
+ },
+ {
+  "name": "msgs-literal/u",
+  "template": "{{ \"{{\" }}x{{ \"}}\" }} {{ range .Messages }}{{ .Content }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "{{x}} Hello, how are you?"
+ },
+ {
+  "name": "msgs-literal/ua",
+  "template": "{{ \"{{\" }}x{{ \"}}\" }} {{ range .Messages }}{{ .Content }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "{{x}} qa"
+ },
+ {
+  "name": "msgs-literal/uau",
+  "template": "{{ \"{{\" }}x{{ \"}}\" }} {{ range .Messages }}{{ .Content }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "{{x}} Hello, how are you?I'm doing great. How can I help you today?I'd like to show off how chat templating works!"
+ },
+ {
+  "name": "msgs-literal/uu",
+  "template": "{{ \"{{\" }}x{{ \"}}\" }} {{ range .Messages }}{{ .Content }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "{{x}} first\n\nsecond"
+ },
+ {
+  "name": "msgs-printf/ssua",
+  "template": "{{- range .Messages }}{{ printf \"\u003c%s|%d\u003e\" .Role 7 }}{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003csystem|7\u003e\u003cuser|7\u003e\u003cassistant|7\u003e"
+ },
+ {
+  "name": "msgs-printf/suau",
+  "template": "{{- range .Messages }}{{ printf \"\u003c%s|%d\u003e\" .Role 7 }}{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003csystem|7\u003e\u003cuser|7\u003e\u003cassistant|7\u003e\u003cuser|7\u003e"
+ },
+ {
+  "name": "msgs-printf/u",
+  "template": "{{- range .Messages }}{{ printf \"\u003c%s|%d\u003e\" .Role 7 }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "\u003cuser|7\u003e"
+ },
+ {
+  "name": "msgs-printf/ua",
+  "template": "{{- range .Messages }}{{ printf \"\u003c%s|%d\u003e\" .Role 7 }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "\u003cuser|7\u003e\u003cassistant|7\u003e"
+ },
+ {
+  "name": "msgs-printf/uau",
+  "template": "{{- range .Messages }}{{ printf \"\u003c%s|%d\u003e\" .Role 7 }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "\u003cuser|7\u003e\u003cassistant|7\u003e\u003cuser|7\u003e"
+ },
+ {
+  "name": "msgs-printf/uu",
+  "template": "{{- range .Messages }}{{ printf \"\u003c%s|%d\u003e\" .Role 7 }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "\u003cuser|7\u003e"
+ },
+ {
+  "name": "msgs-slice-len/ssua",
+  "template": "{{- range $i, $_ := .Messages }}{{ $last := eq (len (slice $.Messages $i)) 1 }}{{ if $last }}LAST{{ else }}.{{ end }}{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "..LAST"
+ },
+ {
+  "name": "msgs-slice-len/suau",
+  "template": "{{- range $i, $_ := .Messages }}{{ $last := eq (len (slice $.Messages $i)) 1 }}{{ if $last }}LAST{{ else }}.{{ end }}{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "...LAST"
+ },
+ {
+  "name": "msgs-slice-len/u",
+  "template": "{{- range $i, $_ := .Messages }}{{ $last := eq (len (slice $.Messages $i)) 1 }}{{ if $last }}LAST{{ else }}.{{ end }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "LAST"
+ },
+ {
+  "name": "msgs-slice-len/ua",
+  "template": "{{- range $i, $_ := .Messages }}{{ $last := eq (len (slice $.Messages $i)) 1 }}{{ if $last }}LAST{{ else }}.{{ end }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": ".LAST"
+ },
+ {
+  "name": "msgs-slice-len/uau",
+  "template": "{{- range $i, $_ := .Messages }}{{ $last := eq (len (slice $.Messages $i)) 1 }}{{ if $last }}LAST{{ else }}.{{ end }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "..LAST"
+ },
+ {
+  "name": "msgs-slice-len/uu",
+  "template": "{{- range $i, $_ := .Messages }}{{ $last := eq (len (slice $.Messages $i)) 1 }}{{ if $last }}LAST{{ else }}.{{ end }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "LAST"
+ },
+ {
+  "name": "msgs-vars/ssua",
+  "template": "{{- $n := 0 }}{{- range .Messages }}{{- $n = len .Content }}[{{ .Role }}:{{ $n }}]{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "[system:16][user:1][assistant:1]"
+ },
+ {
+  "name": "msgs-vars/suau",
+  "template": "{{- $n := 0 }}{{- range .Messages }}{{- $n = len .Content }}[{{ .Role }}:{{ $n }}]{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "[system:28][user:19][assistant:42][user:47]"
+ },
+ {
+  "name": "msgs-vars/u",
+  "template": "{{- $n := 0 }}{{- range .Messages }}{{- $n = len .Content }}[{{ .Role }}:{{ $n }}]{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "[user:19]"
+ },
+ {
+  "name": "msgs-vars/ua",
+  "template": "{{- $n := 0 }}{{- range .Messages }}{{- $n = len .Content }}[{{ .Role }}:{{ $n }}]{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "[user:1][assistant:1]"
+ },
+ {
+  "name": "msgs-vars/uau",
+  "template": "{{- $n := 0 }}{{- range .Messages }}{{- $n = len .Content }}[{{ .Role }}:{{ $n }}]{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "[user:19][assistant:42][user:47]"
+ },
+ {
+  "name": "msgs-vars/uu",
+  "template": "{{- $n := 0 }}{{- range .Messages }}{{- $n = len .Content }}[{{ .Role }}:{{ $n }}]{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "[user:13]"
+ },
+ {
+  "name": "msgs-with/ssua",
+  "template": "{{- with .System }}S:{{ . }}\n{{ end }}{{ range .Messages }}{{ .Role }};{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "sys one"
+   },
+   {
+    "role": "system",
+    "content": "sys two"
+   },
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "S:sys one\n\nsys two\nsystem;user;assistant;"
+ },
+ {
+  "name": "msgs-with/suau",
+  "template": "{{- with .System }}S:{{ . }}\n{{ end }}{{ range .Messages }}{{ .Role }};{{ end }}",
+  "messages": [
+   {
+    "role": "system",
+    "content": "You are a helpful assistant."
+   },
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "S:You are a helpful assistant.\nsystem;user;assistant;user;"
+ },
+ {
+  "name": "msgs-with/u",
+  "template": "{{- with .System }}S:{{ . }}\n{{ end }}{{ range .Messages }}{{ .Role }};{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "expected": "user;"
+ },
+ {
+  "name": "msgs-with/ua",
+  "template": "{{- with .System }}S:{{ . }}\n{{ end }}{{ range .Messages }}{{ .Role }};{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "q"
+   },
+   {
+    "role": "assistant",
+    "content": "a"
+   }
+  ],
+  "expected": "user;assistant;"
+ },
+ {
+  "name": "msgs-with/uau",
+  "template": "{{- with .System }}S:{{ . }}\n{{ end }}{{ range .Messages }}{{ .Role }};{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "expected": "user;assistant;user;"
+ },
+ {
+  "name": "msgs-with/uu",
+  "template": "{{- with .System }}S:{{ . }}\n{{ end }}{{ range .Messages }}{{ .Role }};{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "first"
+   },
+   {
+    "role": "user",
+    "content": "second"
+   }
+  ],
+  "expected": "user;"
+ },
+ {
+  "name": "tools-calls/tc",
+  "template": "{{- range .Messages }}{{ .Role }}{{ range .ToolCalls }}\u003c{{ .Function.Name }}\u003e{{ end }};{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "weather?"
+   },
+   {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+     {
+      "function": {
+       "index": 0,
+       "name": "get_weather",
+       "arguments": {}
+      }
+     }
+    ]
+   },
+   {
+    "role": "tool",
+    "content": "sunny",
+    "tool_name": "get_weather"
+   }
+  ],
+  "tools": [
+   {
+    "type": "function",
+    "function": {
+     "name": "get_weather",
+     "description": "Get the weather",
+     "parameters": {
+      "type": "object",
+      "required": [
+       "location"
+      ],
+      "properties": {
+       "zeta": {
+        "type": "string",
+        "description": "last alphabetically, first inserted"
+       },
+       "alpha": {
+        "type": "number",
+        "description": "first alphabetically"
+       }
+      }
+     }
+    }
+   }
+  ],
+  "expected": "user;assistant\u003cget_weather\u003e;tool;"
+ },
+ {
+  "name": "tools-calls/u",
+  "template": "{{- range .Messages }}{{ .Role }}{{ range .ToolCalls }}\u003c{{ .Function.Name }}\u003e{{ end }};{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "tools": [
+   {
+    "type": "function",
+    "function": {
+     "name": "get_weather",
+     "description": "Get the weather",
+     "parameters": {
+      "type": "object",
+      "required": [
+       "location"
+      ],
+      "properties": {
+       "zeta": {
+        "type": "string",
+        "description": "last alphabetically, first inserted"
+       },
+       "alpha": {
+        "type": "number",
+        "description": "first alphabetically"
+       }
+      }
+     }
+    }
+   }
+  ],
+  "expected": "user;"
+ },
+ {
+  "name": "tools-if/tc",
+  "template": "{{- if .Tools }}HAS{{ else }}NONE{{ end }}{{ range .Messages }}|{{ .Role }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "weather?"
+   },
+   {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+     {
+      "function": {
+       "index": 0,
+       "name": "get_weather",
+       "arguments": {}
+      }
+     }
+    ]
+   },
+   {
+    "role": "tool",
+    "content": "sunny",
+    "tool_name": "get_weather"
+   }
+  ],
+  "tools": [
+   {
+    "type": "function",
+    "function": {
+     "name": "get_weather",
+     "description": "Get the weather",
+     "parameters": {
+      "type": "object",
+      "required": [
+       "location"
+      ],
+      "properties": {
+       "zeta": {
+        "type": "string",
+        "description": "last alphabetically, first inserted"
+       },
+       "alpha": {
+        "type": "number",
+        "description": "first alphabetically"
+       }
+      }
+     }
+    }
+   }
+  ],
+  "expected": "HAS|user|assistant|tool"
+ },
+ {
+  "name": "tools-if/u",
+  "template": "{{- if .Tools }}HAS{{ else }}NONE{{ end }}{{ range .Messages }}|{{ .Role }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "tools": [
+   {
+    "type": "function",
+    "function": {
+     "name": "get_weather",
+     "description": "Get the weather",
+     "parameters": {
+      "type": "object",
+      "required": [
+       "location"
+      ],
+      "properties": {
+       "zeta": {
+        "type": "string",
+        "description": "last alphabetically, first inserted"
+       },
+       "alpha": {
+        "type": "number",
+        "description": "first alphabetically"
+       }
+      }
+     }
+    }
+   }
+  ],
+  "expected": "HAS|user"
+ },
+ {
+  "name": "tools-range/tc",
+  "template": "{{- range .Tools }}{{ .Function.Name }}({{ range $name, $p := .Function.Parameters.Properties }}{{ $name }}:{{ $p.Type }},{{ end }}){{ end }}{{ range .Messages }}|{{ .Role }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "weather?"
+   },
+   {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+     {
+      "function": {
+       "index": 0,
+       "name": "get_weather",
+       "arguments": {}
+      }
+     }
+    ]
+   },
+   {
+    "role": "tool",
+    "content": "sunny",
+    "tool_name": "get_weather"
+   }
+  ],
+  "tools": [
+   {
+    "type": "function",
+    "function": {
+     "name": "get_weather",
+     "description": "Get the weather",
+     "parameters": {
+      "type": "object",
+      "required": [
+       "location"
+      ],
+      "properties": {
+       "zeta": {
+        "type": "string",
+        "description": "last alphabetically, first inserted"
+       },
+       "alpha": {
+        "type": "number",
+        "description": "first alphabetically"
+       }
+      }
+     }
+    }
+   }
+  ],
+  "expected": "get_weather(alpha:number,zeta:string,)|user|assistant|tool"
+ },
+ {
+  "name": "tools-range/u",
+  "template": "{{- range .Tools }}{{ .Function.Name }}({{ range $name, $p := .Function.Parameters.Properties }}{{ $name }}:{{ $p.Type }},{{ end }}){{ end }}{{ range .Messages }}|{{ .Role }}{{ end }}",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   }
+  ],
+  "tools": [
+   {
+    "type": "function",
+    "function": {
+     "name": "get_weather",
+     "description": "Get the weather",
+     "parameters": {
+      "type": "object",
+      "required": [
+       "location"
+      ],
+      "properties": {
+       "zeta": {
+        "type": "string",
+        "description": "last alphabetically, first inserted"
+       },
+       "alpha": {
+        "type": "number",
+        "description": "first alphabetically"
+       }
+      }
+     }
+    }
+   }
+  ],
+  "expected": "get_weather(alpha:number,zeta:string,)|user"
+ },
+ {
+  "name": "command-r.gotmpl/tools",
+  "template": "{{- if or .Tools .System }}\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003e\n{{- if .Tools }}# Safety Preamble\nThe instructions in this section override those in the task description and style guide sections. Don't answer questions that are harmful or immoral.\n\n# System Preamble\n## Basic Rules\nYou are a powerful conversational AI trained by Cohere to help people. You are augmented by a number of tools, and your job is to use and consume the output of these tools to best help the user. You will see a conversation history between yourself and a user, ending with an utterance from the user. You will then see a specific instruction instructing you what kind of response to generate. When you answer the user's requests, you cite your sources in your answers, according to those instructions.\n\n{{ if .System }}# User Preamble\n{{ .System }}\n{{- end }}\n\n## Available Tools\nHere is a list of tools that you have available to you:\n{{- range .Tools }}\n\n```python\ndef {{ .Function.Name }}(\n{{- range $name, $property := .Function.Parameters.Properties }}{{ $name }}: {{ $property.Type }}, {{ end }}) -\u003e List[Dict]:\n    '''{{ .Function.Description }}\n\n{{- if .Function.Parameters.Properties }}\n\n    Args:\n{{- range $name, $property := .Function.Parameters.Properties }}\n        {{ $name }} ({{ $property.Type }}): {{ $property.Description }}\n{{- end }}\n{{- end }}\n    '''\n    pass\n```\n{{- end }}\n{{- else if .System }}{{ .System }}\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\n{{- end }}\n{{- range .Messages }}\n{{- if eq .Role \"system\" }}\n{{- continue }}\n{{- end }}\u003c|START_OF_TURN_TOKEN|\u003e\n{{- if eq .Role \"user\" }}\u003c|USER_TOKEN|\u003e{{ .Content }}\n{{- if $.Tools }}\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003eWrite 'Action:' followed by a json-formatted list of actions that you want to perform in order to produce a good response to the user's last input. You can use any of the supplied tools any number of times, but you should aim to execute the minimum number of necessary actions for the input. You should use the `directly-answer` tool if calling the other tools is unnecessary. The list of actions you want to call should be formatted as a list of json objects, for example:\n```json\n[\n    {\n        \"tool_name\": title of the tool in the specification,\n        \"parameters\": a dict of parameters to input into the tool as they are defined in the specs, or {} if it takes no parameters\n    }\n]```\n{{- end }}\n{{- else if eq .Role \"assistant\" }}\u003c|CHATBOT_TOKEN|\u003e\n{{- if .Content }}{{ .Content }}\n{{- else if .ToolCalls }}\nAction: ```json\n[\n{{- range .ToolCalls }}\n    {\n        \"tool_name\": \"{{ .Function.Name }}\",\n        \"parameters\": {{ .Function.Arguments }}\n    }\n{{- end }}\n]```\n{{- end }}\n{{- else if eq .Role \"tool\" }}\u003c|SYSTEM_TOKEN|\u003e\u003cresults\u003e\nconsole_output: {{ .Content }}\n\u003c/results\u003e\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\n{{- end }}\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003e\n",
+  "messages": [
+   {
+    "role": "user",
+    "content": "Hello, how are you?"
+   },
+   {
+    "role": "assistant",
+    "content": "I'm doing great. How can I help you today?"
+   },
+   {
+    "role": "user",
+    "content": "I'd like to show off how chat templating works!"
+   }
+  ],
+  "tools": [
+   {
+    "type": "function",
+    "function": {
+     "name": "get_weather",
+     "description": "Get the weather",
+     "parameters": {
+      "type": "object",
+      "required": [
+       "location"
+      ],
+      "properties": {
+       "zeta": {
+        "type": "string",
+        "description": "last alphabetically, first inserted"
+       },
+       "alpha": {
+        "type": "number",
+        "description": "first alphabetically"
+       }
+      }
+     }
+    }
+   }
+  ],
+  "expected": "\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003e# Safety Preamble\nThe instructions in this section override those in the task description and style guide sections. Don't answer questions that are harmful or immoral.\n\n# System Preamble\n## Basic Rules\nYou are a powerful conversational AI trained by Cohere to help people. You are augmented by a number of tools, and your job is to use and consume the output of these tools to best help the user. You will see a conversation history between yourself and a user, ending with an utterance from the user. You will then see a specific instruction instructing you what kind of response to generate. When you answer the user's requests, you cite your sources in your answers, according to those instructions.\n\n\n\n## Available Tools\nHere is a list of tools that you have available to you:\n\n```python\ndef get_weather(alpha: number, zeta: string, ) -\u003e List[Dict]:\n    '''Get the weather\n\n    Args:\n        alpha (number): first alphabetically\n        zeta (string): last alphabetically, first inserted\n    '''\n    pass\n```\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|USER_TOKEN|\u003eHello, how are you?\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003eWrite 'Action:' followed by a json-formatted list of actions that you want to perform in order to produce a good response to the user's last input. You can use any of the supplied tools any number of times, but you should aim to execute the minimum number of necessary actions for the input. You should use the `directly-answer` tool if calling the other tools is unnecessary. The list of actions you want to call should be formatted as a list of json objects, for example:\n```json\n[\n    {\n        \"tool_name\": title of the tool in the specification,\n        \"parameters\": a dict of parameters to input into the tool as they are defined in the specs, or {} if it takes no parameters\n    }\n]```\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003eI'm doing great. How can I help you today?\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|USER_TOKEN|\u003eI'd like to show off how chat templating works!\u003c|START_OF_TURN_TOKEN|\u003e\u003c|SYSTEM_TOKEN|\u003eWrite 'Action:' followed by a json-formatted list of actions that you want to perform in order to produce a good response to the user's last input. You can use any of the supplied tools any number of times, but you should aim to execute the minimum number of necessary actions for the input. You should use the `directly-answer` tool if calling the other tools is unnecessary. The list of actions you want to call should be formatted as a list of json objects, for example:\n```json\n[\n    {\n        \"tool_name\": title of the tool in the specification,\n        \"parameters\": a dict of parameters to input into the tool as they are defined in the specs, or {} if it takes no parameters\n    }\n]```\u003c|END_OF_TURN_TOKEN|\u003e\u003c|END_OF_TURN_TOKEN|\u003e\u003c|START_OF_TURN_TOKEN|\u003e\u003c|CHATBOT_TOKEN|\u003e\n"
+ }
+]

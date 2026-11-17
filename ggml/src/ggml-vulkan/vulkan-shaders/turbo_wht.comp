@@ -1,0 +1,123 @@
+#version 450
+// GGML_OP_TURBO_WHT on Vulkan: the randomised Walsh-Hadamard rotation TurboQuant applies to 32/64/128-element groups.
+//
+//   forward  (direction 0):  y = s_post . H(s_pre . x) / sqrt(g)       pre = S1, post = S2   (g = 128 or 64, the first g entries)
+//   inverse  (direction 1):  x = s_pre'. H(s_post'. y) / sqrt(g)       pre = S2, post = S1
+//   g = 32 has ONE sign vector: forward = H(S . x)/sqrt(32), inverse = S . H(y)/sqrt(32).
+//   InnerQ scale_inv (optional, binding 2, g floats): forward multiplies BEFORE the signs, inverse AFTER the final sign.
+//   Elements of a row past the last whole group (ne0 % g) are copied unchanged, as ggml-cuda/turbo-wht.cu does.
+//
+// This is the same maths, in the same operation order, as k_turbo_wht_f32 (ggml-cuda/turbo-wht.cu) and turbo_cpu_fwht (ggml-turbo-quant.c): sign
+// multiply, radix-2 butterflies h = 1..g/2 with the lower index forming a+b, then x * (1/sqrt(g)) * sign. Every sign is exactly +-1 so the multiplies
+// are exact and the result matches the CUDA generic kernel bit for bit on a device without FMA contraction of the lone multiply.
+//
+// One workgroup = one group. The source may be strided (ne1/ne2/ne3 with float strides), because the flash-attention wrapper rotates Q in place of a
+// view; the destination is addressed with its own strides so an in-place un-rotation of the attention output is the same dispatch.
+// In-place (src and dst the same buffer, same strides) is safe: a workgroup reads its whole group into shared memory before it writes anything and no
+// two workgroups touch the same group.
+// GROUP-WIDE BARRIERS: every barrier() below is reached by all 128 invocations of a workgroup (threads >= g only idle), and every early return is
+// workgroup-uniform (it depends on the workgroup id and push constants only).
+//
+// Design reference (MIT): TheTom/llama-cpp-turboquant bcb85fc3ae85 ggml-vulkan/vulkan-shaders/turbo_wht.comp, which handles g = 128 only, ignores
+// group_size and scale_inv, and requires a contiguous source; this version is written to the CUDA op's full contract.
+
+#extension GL_EXT_control_flow_attributes : require
+
+#include "turbo_tables.glsl"
+
+layout (local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
+
+layout (push_constant) uniform parameter {
+    uint ne0;          // elements per row (head_dim)
+    uint ne1; uint ne2; uint ne3;
+    uint src_nb1; uint src_nb2; uint src_nb3;   // strides in floats (dim 0 is contiguous)
+    uint dst_nb1; uint dst_nb2; uint dst_nb3;
+    uint src_off; uint dst_off;                  // floats: buffer-offset misalignment of src / dst
+    uint direction;
+    uint group_size;
+    uint has_scale;
+} p;
+
+layout (binding = 0) readonly  buffer A { float data_a[]; };
+layout (binding = 1) writeonly buffer D { float data_d[]; };
+layout (binding = 2) readonly  buffer S { float data_s[]; };
+
+shared float x[128];
+
+void main() {
+    const uint t  = gl_LocalInvocationID.x;
+    const uint wg = gl_WorkGroupID.z * 262144 + gl_WorkGroupID.y * 512 + gl_WorkGroupID.x;
+
+    const uint gs     = p.group_size;
+    const uint gpr    = p.ne0 / gs;                       // whole groups per row
+    const uint tail   = p.ne0 - gpr * gs;
+    const uint wg_row = gpr + (tail > 0u ? 1u : 0u);      // workgroups per row (one extra copies the tail)
+    const uint rows   = p.ne1 * p.ne2 * p.ne3;
+    if (wg >= rows * wg_row) {
+        return;
+    }
+
+    const uint row = wg / wg_row;
+    const uint grp = wg % wg_row;
+    const uint i1  = row % p.ne1;
+    const uint i2  = (row / p.ne1) % p.ne2;
+    const uint i3  = row / (p.ne1 * p.ne2);
+    const uint src_row = p.src_off + i1 * p.src_nb1 + i2 * p.src_nb2 + i3 * p.src_nb3;
+    const uint dst_row = p.dst_off + i1 * p.dst_nb1 + i2 * p.dst_nb2 + i3 * p.dst_nb3;
+
+    if (grp == gpr) {
+        // trailing elements that do not fill a group pass through untouched
+        for (uint e = t; e < tail; e += 128u) {
+            data_d[dst_row + gpr * gs + e] = data_a[src_row + gpr * gs + e];
+        }
+        return;
+    }
+
+    const uint base = grp * gs;
+    const bool act  = t < gs;
+    const bool fwd  = p.direction == 0u;
+
+    float v = act ? data_a[src_row + base + t] : 0.0;
+
+    // InnerQ forward: scale before signs + butterfly
+    if (act && fwd && p.has_scale != 0u) {
+        v *= data_s[t];
+    }
+
+    // first sign vector
+    if (act) {
+        if (gs == 32u) {
+            v *= fwd ? TURBO_TQW_SIGNS[t] : 1.0;
+        } else {
+            v *= fwd ? TURBO_S1[t] : TURBO_S2[t];
+        }
+    }
+    x[t] = v;
+    barrier();
+
+    for (uint h = 1u; h < gs; h *= 2u) {
+        if (act && (t % (2u * h)) < h) {
+            const float a = x[t];
+            const float b = x[t + h];
+            x[t]     = a + b;
+            x[t + h] = a - b;
+        }
+        barrier();
+    }
+
+    if (act) {
+        const float inv_sqrt = gs == 128u ? TURBO_INV_SQRT_128 : (gs == 64u ? 0.125 : 0.17677669529663688);
+        float second = 1.0;
+        if (gs == 32u) {
+            second = fwd ? 1.0 : TURBO_TQW_SIGNS[t];
+        } else {
+            second = fwd ? TURBO_S2[t] : TURBO_S1[t];
+        }
+        float r = x[t] * inv_sqrt * second;
+        // InnerQ inverse: scale after the final sign
+        if (!fwd && p.has_scale != 0u) {
+            r *= data_s[t];
+        }
+        data_d[dst_row + base + t] = r;
+    }
+}

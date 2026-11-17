@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "family": "parakeet_tdt",
+  "display_name": "NVIDIA Parakeet-TDT 0.6B v3",
+  "description": "FastConformer encoder with a Token-and-Duration Transducer decoder. 25 European languages, offline / long-form / buffered-streaming ASR.",
+  "category": "asr",
+  "status": "supported",
+  "tasks": [
+    "asr"
+  ],
+  "modes": [
+    "offline"
+  ],
+  "languages": [
+    "auto",
+    "bg",
+    "cs",
+    "da",
+    "de",
+    "el",
+    "en",
+    "es",
+    "et",
+    "fi",
+    "fr",
+    "hr",
+    "hu",
+    "it",
+    "lt",
+    "lv",
+    "mt",
+    "nl",
+    "pl",
+    "pt",
+    "ro",
+    "ru",
+    "sk",
+    "sl",
+    "sv",
+    "uk"
+  ],
+  "runtime": {
+    "tags": [
+      "gguf"
+    ],
+    "binary": "llama-audio",
+    "projector": "parakeet (fork mtmd, encoder-only: the graph stops at encoder_out when the GGUF has no projector)",
+    "decoder": "examples/audio/asr-tdt.{h,cpp}: 2-layer LSTM prediction net + joint + greedy Token-and-Duration Transducer, CPU",
+    "usage": "llama-audio --task asr --mmproj parakeet-tdt-0.6b-v3-f16.gguf --audio in.wav [--words-out words.json]"
+  },
+  "packages": [
+    {
+      "id": "parakeet_tdt_0_6b_v3_f16_fork",
+      "display_name": "Parakeet-TDT 0.6B v3 F16 GGUF (this fork's converter)",
+      "default": true,
+      "format": "gguf",
+      "precision": "f16",
+      "size_bytes": 1292147424,
+      "files": [
+        "parakeet-tdt-0.6b-v3-f16.gguf"
+      ],
+      "build": {
+        "kind": "convert",
+        "script": "examples/audio/convert-parakeet-tdt-to-gguf.py",
+        "from_package": "parakeet_tdt_0_6b_v3_nemo"
+      }
+    },
+    {
+      "id": "parakeet_tdt_0_6b_v3_nemo",
+      "display_name": "Parakeet-TDT 0.6B v3 (original NeMo weights, CC-BY-4.0)",
+      "default": false,
+      "format": "nemo",
+      "revision": "541d1f99c6b0c3cd0b11a95167540bb8edefd82b",
+      "sha256": "3cbdc85877e668ca7b82d0d56770eb1fac76691f55d6b97545e8d61ca588d10d",
+      "download": {
+        "kind": "huggingface_snapshot",
+        "repo": "nvidia/parakeet-tdt-0.6b-v3"
+      }
+    }
+  ],
+  "ui": {
+    "recommended_package": "parakeet_tdt_0_6b_v3_f16_fork",
+    "tags": [
+      "ASR",
+      "GGUF",
+      "Transducer"
+    ]
+  },
+  "verified": {
+    "date": "2026-10-20",
+    "test": "examples/audio/tests/test-asr-tdt-cli.py (+ tests/test-asr-tdt.cpp)",
+    "jfk": "exact match with whisper.cpp tests/parakeet-expected-jfk-output.txt",
+    "librispeech_test_clean_6930-75918-0000/0001": "WER 0/51",
+    "silence_10s_and_noise_20s_minus50dBFS": "empty transcript (the Voxtral LLM route wrote 383 words on the same noise)",
+    "word_times": "duration head; A + 12 s silence + B: A ends 3.52 s, B starts 15.52 s (B truth 15.505 s)",
+    "note": "streaming is not implemented; the CPU F16 encoder ran at RTF 1.0-9.8 on 4 threads of a busy host"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "family": "muse",
+  "display_name": "\"Muse\" -- RESOLVED: Muse-Glimmer, and it is not an audio model",
+  "description": "The task list named MUSE alongside TTS / PARAKEET / SPEECH / Qwen3-ASR. Resolved on 2026-08-31 by parsing upstream llama.cpp's mtmd projector enum rather than by guessing from the name.",
+  "category": "vision-language",
+  "status": "out_of_scope_for_audio",
+  "tasks": [],
+  "resolution": {
+    "answer": "Muse-Glimmer-30B, a multimodal vision-language model. Upstream llama.cpp carries it as PROJECTOR_TYPE_MUSE_GLIMMER / \"muse-glimmer\" in examples/mtmd/clip-impl.h (line 502 and 566 of the upstream-mtmd-catchup worktree).",
+    "evidence": [
+      "upstream enum parsed at tmp/wt_mtmd/examples/mtmd/clip-impl.h:502,566 -- control PROJECTOR_TYPE_MLP present in the same sweep",
+      "Hugging Face search: meta-models/Muse-Glimmer-30B and unsloth/Muse-Glimmer-30B-GGUF, ~1.5M combined downloads, pipeline_tag=image-text-to-text",
+      "the sibling asr_agent independently classified MUSE_GLIMMER as NOT audio-input"
+    ],
+    "verdict": "It is a VISION projector. It belongs to the mtmd upstream-catchup workstream, not to llama-audio. Nothing for the audio pipeline to implement.",
+    "rejected_candidates": [
+      "MuseTalk / MuseV (TMElyralab) -- audio-DRIVEN lip-sync VIDEO; consumes audio, generates none. Hugging Face pipeline_tag=image-to-image.",
+      "MuScriptor (audio.cpp family 'muscriptor') -- genuinely audio (audio-to-MIDI transcription), but the name match is weaker than Muse-Glimmer's exact enum hit."
+    ]
+  },
+  "ui": { "tags": ["Vision", "Not audio"] }
+}

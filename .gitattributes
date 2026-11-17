@@ -1,0 +1,6 @@
+# Append-only line registries: every branch adds lines at the end, so two branches always "conflict" on the same
+# trailing hunk while meaning "keep both". merge=union keeps both sides' lines (git's built-in union driver).
+# MEASURED 2026-11-12: merging work/bonsaiq2-1111 into merge/batch-1112a after work/dsv4chain-1111 stopped on
+# exactly this conflict in .carried-not-compiled-baseline.txt (one line each side) and needed a hand resolve.
+.carried-not-compiled-baseline.txt merge=union
+scripts/modules-wired-allowlist.txt merge=union

@@ -1,0 +1,35 @@
+#version 450
+
+#include "dequant_head.comp"
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+layout (binding = 0) readonly buffer A {block_q1_0_g128 data_a[];};
+layout (binding = 1) writeonly buffer D {D_TYPE data_b[];};
+
+// Bonsai 1-bit, group 128. Eight weights per byte, LSB-first, elements SEQUENTIAL: byte b holds
+// elements 8b..8b+7. A set bit is +d and a clear bit is -d.
+//
+// The mapping is taken verbatim from dequantize_row_q1_0_g128 in ggml/src/iqk/iqk_quantize.cpp
+// (`*y++ = x[ib].qs[i] & k_mask[j] ? d : -d;` with k_mask = {0x01,0x02,...,0x80}), not inferred.
+// Note this is NOT the same shape as Q2_0_G128's `code - 1`: at one bit there is no zero level,
+// so the values are +/-d and never 0.
+//
+// One invocation handles one block of 128 weights.
+void main() {
+    const uint ib = gl_WorkGroupID.x * 256 + gl_LocalInvocationID.x;
+
+    if (ib >= p.nel / QUANT_K_Q1_0_G128) {
+        return;
+    }
+
+    const uint b_idx = QUANT_K_Q1_0_G128 * ib;
+    const float d = float(data_a[ib].d);
+
+    [[unroll]] for (uint l = 0; l < QUANT_K_Q1_0_G128 / 8; ++l) {
+        const uint packed = uint(data_a[ib].qs[l]);
+        [[unroll]] for (uint j = 0; j < 8; ++j) {
+            data_b[b_idx + 8*l + j] = D_TYPE(((packed >> j) & 1) != 0 ? d : -d);
+        }
+    }
+}

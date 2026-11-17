@@ -1,0 +1,38 @@
+#version 450
+
+#include "dequant_head.comp"
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+layout (binding = 0) readonly buffer A {block_q2_0_g128 data_a[];};
+layout (binding = 1) writeonly buffer D {D_TYPE data_b[];};
+
+// Bonsai ternary, group 128. Four 2-bit codes per byte, LSB-first, elements SEQUENTIAL:
+// byte b holds elements 4b..4b+3. Value is d * (code - 1), so codes 0/1/2 mean -1/0/+1
+// (code 3 would be +2 and is unused by a ternary quantizer).
+//
+// The mapping is NOT inferred: it is taken from the PrismML fork's ggml-cpu/quants.c
+// ("map {0,1,2,3} -> {-1,0,1,2}") and was verified against the F16 parent of this exact model --
+// 8192 codes across 64/64 blocks reconstructed byte-exactly. Guessing it would decode to silently
+// wrong weights rather than an error, which is the failure mode this whole format has.
+//
+// One invocation handles one block of 128 weights. Unlike the 32-element nibble types there is no
+// il/ir half-split here: the layout is sequential, so a split would only obscure the indexing.
+void main() {
+    const uint ib = gl_WorkGroupID.x * 256 + gl_LocalInvocationID.x;
+
+    if (ib >= p.nel / QUANT_K_Q2_0_G128) {
+        return;
+    }
+
+    const uint b_idx = QUANT_K_Q2_0_G128 * ib;
+    const float d = float(data_a[ib].d);
+
+    [[unroll]] for (uint l = 0; l < QUANT_K_Q2_0_G128 / 4; ++l) {
+        const uint packed = uint(data_a[ib].qs[l]);
+        data_b[b_idx + 4*l + 0] = D_TYPE(d * (float((packed >> 0) & 3) - 1.0f));
+        data_b[b_idx + 4*l + 1] = D_TYPE(d * (float((packed >> 2) & 3) - 1.0f));
+        data_b[b_idx + 4*l + 2] = D_TYPE(d * (float((packed >> 4) & 3) - 1.0f));
+        data_b[b_idx + 4*l + 3] = D_TYPE(d * (float((packed >> 6) & 3) - 1.0f));
+    }
+}

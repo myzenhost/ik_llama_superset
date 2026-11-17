@@ -1,0 +1,137 @@
+#extension GL_EXT_shader_explicit_arithmetic_types_int32 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int16 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int8 : require
+
+#include "types.comp"
+
+// Each iqs value maps to a 32-bit integer
+
+#if defined(DATA_A_Q4_0)
+i32vec2 repack(uint ib, uint iqs) {
+    // Use 2-byte loads since a q4_0 block (18 bytes) is not divisible by 4
+    const u16vec2 quants = u16vec2(data_a[ib].qs[iqs * 2    ],
+                                   data_a[ib].qs[iqs * 2 + 1]);
+    const uint32_t vui = pack32(quants);
+    return i32vec2( vui       & 0x0F0F0F0F,
+                   (vui >> 4) & 0x0F0F0F0F);
+}
+
+ACC_TYPE mul_q8_1(int32_t q_sum, float da, vec2 dsb) {
+    return ACC_TYPE(da * (float(q_sum) * dsb.x - 8.0f * dsb.y));
+}
+#endif
+
+#if defined(DATA_A_Q4_1)
+i32vec2 repack(uint ib, uint iqs) {
+    // Use 4-byte loads since a q4_1 block (20 bytes) is divisible by 4
+    const uint32_t vui = data_a_packed32[ib].qs[iqs];
+    return i32vec2( vui       & 0x0F0F0F0F,
+                   (vui >> 4) & 0x0F0F0F0F);
+}
+
+ACC_TYPE mul_q8_1(int32_t q_sum, vec2 dma, vec2 dsb) {
+    return ACC_TYPE(float(q_sum) * dma.x * dsb.x + dma.y * dsb.y);
+}
+#endif
+
+#if defined(DATA_A_Q5_0)
+i32vec2 repack(uint ib, uint iqs) {
+    // Use 2-byte loads since a q5_0 block (22 bytes) is not divisible by 4
+    const u16vec2 quants = u16vec2(data_a[ib].qs[iqs * 2    ],
+                                   data_a[ib].qs[iqs * 2 + 1]);
+    const uint32_t vui = pack32(quants);
+    const int32_t qh = int32_t((uint32_t(data_a[ib].qh[1]) << 16 | data_a[ib].qh[0]) >> (4 * iqs));
+    const int32_t v0 = int32_t(vui & 0x0F0F0F0F)
+                     | ((qh & 0xF) * 0x02040810) & 0x10101010; // (0,1,2,3) -> (4,12,20,28)
+
+    const int32_t v1 = int32_t((vui >> 4) & 0x0F0F0F0F)
+                     | (((qh >> 16) & 0xF) * 0x02040810) & 0x10101010; // (16,17,18,19) -> (4,12,20,28)
+
+    return i32vec2(v0, v1);
+}
+
+ACC_TYPE mul_q8_1(int32_t q_sum, float da, vec2 dsb) {
+    return ACC_TYPE(da * (float(q_sum) * dsb.x - 16.0f * dsb.y));
+}
+#endif
+
+#if defined(DATA_A_Q5_1)
+i32vec2 repack(uint ib, uint iqs) {
+    // Use 4-byte loads since a q5_1 block (24 bytes) is divisible by 4
+    const uint32_t vui = data_a_packed32[ib].qs[iqs];
+    const int32_t qh = int32_t(data_a_packed32[ib].qh >> (4 * iqs));
+    const int32_t v0 = int32_t(vui & 0x0F0F0F0F)
+                     | ((qh & 0xF) * 0x02040810) & 0x10101010; // (0,1,2,3) -> (4,12,20,28)
+
+    const int32_t v1 = int32_t((vui >> 4) & 0x0F0F0F0F)
+                     | (((qh >> 16) & 0xF) * 0x02040810) & 0x10101010; // (16,17,18,19) -> (4,12,20,28)
+
+    return i32vec2(v0, v1);
+}
+
+ACC_TYPE mul_q8_1(int32_t q_sum, vec2 dma, vec2 dsb) {
+    return ACC_TYPE(float(q_sum) * dma.x * dsb.x + dma.y * dsb.y);
+}
+#endif
+
+#if defined(DATA_A_Q8_0)
+int32_t repack(uint ib, uint iqs) {
+    // Use 2-byte loads since a q8_0 block (34 bytes) is not divisible by 4
+    return pack32(i16vec2(data_a[ib].qs[iqs * 2    ],
+                          data_a[ib].qs[iqs * 2 + 1]));
+}
+
+ACC_TYPE mul_q8_1(int32_t q_sum, float da, vec2 dsb) {
+    return ACC_TYPE(float(q_sum) * da * dsb.x);
+}
+#endif
+
+#if defined(DATA_A_Q1_0_G128)
+// 128 weights, ONE bit each, qs[16]. Set = +1, clear = -1; there is no zero level at one bit.
+// `iqs` counts GROUPS OF FOUR elements, as it does for q8_0 (8 groups per 32-element block).
+// A 128-element block therefore has 32 groups, and four consecutive 1-bit codes are one NIBBLE.
+int32_t repack(uint ib, uint iqs) {
+    const uint byte = uint(data_a[ib].qs[iqs >> 1]);
+    const uint nib  = (byte >> ((iqs & 1) * 4)) & 0xF;
+    // bit -> +1 / -1, packed as four signed int8 lanes for dotPacked4x8EXT
+    const int v0 = ((nib     ) & 1) != 0 ?  1 : -1;
+    const int v1 = ((nib >> 1) & 1) != 0 ?  1 : -1;
+    const int v2 = ((nib >> 2) & 1) != 0 ?  1 : -1;
+    const int v3 = ((nib >> 3) & 1) != 0 ?  1 : -1;
+    return (v0 & 0xFF) | ((v1 & 0xFF) << 8) | ((v2 & 0xFF) << 16) | ((v3 & 0xFF) << 24);
+}
+
+// Values are ALREADY SIGNED, so this is q8_0's form with NO dsb.y offset term. See the header.
+ACC_TYPE mul_q8_1(int32_t q_sum, float da, vec2 dsb) {
+    return ACC_TYPE(float(q_sum) * da * dsb.x);
+}
+#endif
+
+#if defined(DATA_A_Q2_0_G128)
+// 128 weights, TWO bits each, qs[32]. Ternary: value = code - 1, i.e. {0,1,2} -> {-1,0,+1}.
+// `iqs` counts groups of four elements, and four consecutive 2-bit codes are exactly ONE BYTE.
+int32_t repack(uint ib, uint iqs) {
+    const uint byte = uint(data_a[ib].qs[iqs]);
+    const int v0 = int((byte      ) & 3) - 1;
+    const int v1 = int((byte >>  2) & 3) - 1;
+    const int v2 = int((byte >>  4) & 3) - 1;
+    const int v3 = int((byte >>  6) & 3) - 1;
+    return (v0 & 0xFF) | ((v1 & 0xFF) << 8) | ((v2 & 0xFF) << 16) | ((v3 & 0xFF) << 24);
+}
+
+ACC_TYPE mul_q8_1(int32_t q_sum, float da, vec2 dsb) {
+    return ACC_TYPE(float(q_sum) * da * dsb.x);
+}
+#endif
+
+#if defined(DATA_A_Q4_0) || defined(DATA_A_Q5_0) || defined(DATA_A_Q8_0) || defined(DATA_A_Q1_0_G128) || defined(DATA_A_Q2_0_G128) || defined(DATA_A_IQ1_S) || defined(DATA_A_IQ2_XXS) || defined(DATA_A_IQ2_XS) || defined(DATA_A_IQ2_S) || defined(DATA_A_IQ3_XXS) || defined(DATA_A_IQ3_S) || defined(DATA_A_IQ4_XS) || defined(DATA_A_IQ4_NL)
+FLOAT_TYPE get_d(uint ib) {
+    return FLOAT_TYPE(data_a[ib].d);
+}
+#endif
+
+#if defined(DATA_A_Q4_1) || defined(DATA_A_Q5_1)
+FLOAT_TYPE_VEC2 get_dm(uint ib) {
+    return FLOAT_TYPE_VEC2(data_a_packed32[ib].dm);
+}
+#endif

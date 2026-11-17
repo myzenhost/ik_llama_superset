@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "family": "qwen3_asr",
+  "display_name": "Qwen3-ASR 1.7B",
+  "description": "Qwen3 speech-recognition model with a dedicated audio projector. 30 languages. Upstream llama.cpp publishes a ready mmproj for it.",
+  "category": "asr",
+  "status": "wanted",
+  "tasks": ["asr"],
+  "modes": ["offline", "streaming"],
+  "languages": ["zh","en","yue","ar","de","fr","es","pt","id","it","ko","ru","th","vi","ja","tr","hi","ms","nl","sv","da","fi","pl","cs","fil","fa","el","ro","hu","mk"],
+  "runtime": { "tags": ["gguf", "mmproj"], "binary": "llama-audio", "projector": "qwen3a" },
+  "packages": [
+    {
+      "id": "qwen3_asr_1_7b_q8_0",
+      "display_name": "Qwen3-ASR 1.7B Q8_0",
+      "default": true,
+      "format": "gguf",
+      "precision": "q8_0",
+      "size_bytes": 2165000000,
+      "files": ["Qwen3-ASR-1.7B-Q8_0.gguf", "mmproj-Qwen3-ASR-1.7B-Q8_0.gguf"],
+      "download": { "kind": "huggingface_file", "repo": "ggml-org/Qwen3-ASR-1.7B-GGUF" }
+    }
+  ],
+  "blocked_by": {
+    "reason": "This fork's mtmd projector enum (examples/mtmd/clip-impl.h) has ULTRAVOX, QWEN2A, QWEN25O, VOXTRAL and GEMMA4A but NO Qwen3 audio projector, so mtmd_init_from_file rejects the mmproj above.",
+    "owner": "the mtmd upstream-catchup workstream owns examples/mtmd/**; llama-audio needs no change once the projector lands",
+    "verified": "projector enum parsed from clip-impl.h lines 144-171 on 2026-08-31; file list read from the Hugging Face API the same day"
+  },
+  "ui": { "recommended_package": "qwen3_asr_1_7b_q8_0", "tags": ["ASR", "GGUF", "Wanted"] }
+}

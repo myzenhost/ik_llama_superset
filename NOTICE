@@ -1,0 +1,45 @@
+NOTICE
+
+This repository is a fork of ik_llama.cpp, which is itself a fork of llama.cpp / ggml. LICENSE (MIT) names, in lines 3-5, "The ggml
+authors", "The llama.cpp authors" and "The ik_llama.cpp authors". The additions made in this fork are offered under the same MIT terms.
+LICENSE has no separate line for the authors of this fork.
+
+1. Code merged from other llama.cpp forks (MIT, copyright "The ggml authors", covered by LICENSE):
+   - ggml-org/llama.cpp (upstream), ikawrakow/ik_llama.cpp, unslothai/llama.cpp (Unsloth's fork; cited in comments as
+     unsloth-llama.cpp and unsloth-llama-inkling-raw), TheTom/llama-cpp-turboquant (TurboQuant / TQ block types).
+   - whisper.cpp (MIT, "The ggml authors"): cited in comments.
+
+2. Bundled components that keep their own licence file or file headers:
+   - licenses/LICENSE-jsonhpp (nlohmann/json, MIT); vendor/cpp-httplib/LICENSE (MIT); vendor/hash/rotate-bits/LICENSE.md (MIT);
+     vendor/hash/sha256/LICENSE (public domain); vendor/hash/xxhash/LICENSE (xxHash, BSD 2-Clause); vendor/simplewebp/LICENSE.md
+     (BSD-style, Google Inc. and the simplewebp author); vendor/sqlite3/LICENSE (public domain); gguf-py/LICENSE (MIT).
+   - vendor/miniaudio/miniaudio.h and vendor/stb/*.h (MIT or public domain, stated at the end of each header) and
+     vendor/sheredom/subprocess.h (licence text in its header) carry their licence inside the file.
+   - tools/ui/src/lib/vendors/*: big-integer/LICENSE (public domain), decimal.js/LICENCE.md (MIT), nerdamer-prime/LICENSE (MIT).
+   - tests/ttt-inplace-oracle: Apache-2.0 (its LICENSE). Files with an SPDX header of Apache-2.0 (ggml/src/ggml-openvino/*) or
+     Apache-2.0 WITH LLVM-exception (ggml/src/ggml-sycl*) are under that licence; the Apache-2.0 text is in licenses/LICENSE-Apache-2.0.
+   - tools/server/webui/dist/index.html is a built bundle that embeds third-party libraries (for example a pdf.js worker, Apache-2.0,
+     and KaTeX fonts); their notices are inside the bundle.
+   - docs/THIRD_PARTY_NOTICES_E_SERVING.md: Qualcomm / NexaAI nexa-sdk patches (BSD-3-Clause), redistribution notice included.
+
+3. Behaviour re-implemented from other engines. The source comments say each of these was read for behaviour and rewritten in this
+   repository's own words and structure, without copying code ("SOURCE-READ ... no code copied"). Licence of each, from the
+   project's own licence file or file headers (read 2026-11-18) or from the GitHub licence API (2026-11-17):
+   - Apache-2.0: vllm-project/vllm, sgl-project/sglang, mlc-ai/xgrammar, huggingface/text-generation-inference,
+     huggingface/peft, huggingface/transformers (cited as hf-transformers-inkling-raw; file headers), ztxz16/fastllm,
+     predibase/lorax, thu-ml/SpargeAttn, xorbitsai/inference (cited as xinference), pytorch/serve (cited as torchserve),
+     vespa-engine/vespa, rtp-llm (alibaba), ferrox, trnrt (its NOTICE says it derives from the Apache-2.0 project Kiln).
+   - MIT: mudler/LocalAI, ollama/ollama, turboderp-org/exllamav2 and exllamav3 (cited as exllamav3_up1020),
+     GeeeekExplorer/nano-vllm, beellama.cpp, NexaAI nexa-sdk patches (see section 2).
+   - MIT OR Apache-2.0: the cudarc crate (version 0.19.4), cited by one comment.
+   - AGPL-3.0 (read for behaviour only; NO code copied according to the in-tree comments): LostRuins/koboldcpp,
+     theroyallab/tabbyAPI, aphrodite-engine/aphrodite-engine, and oobabooga/text-generation-webui (named "spec only" in
+     tests/test-sampling.cpp).
+
+4. One apparent exception to "no code copied". The DRY sampler comments "Ported from Koboldcpp" / "porting Koboldcpp
+   implementation" (src/llama-sampling.cpp, src/llama-sampler.cpp, include/llama.h) are INHERITED from ik_llama.cpp / llama.cpp,
+   where that sampler was contributed upstream; they entered this repository's history on 2024-10-25, before any of the work
+   described in section 3, and are not a port made in this fork. The licence terms of that upstream contribution are those of the
+   upstream repositories (MIT).
+
+The upstream/<project>/ paths that appear in source comments are citations of those projects' files; they are not paths in this tree.

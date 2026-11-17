@@ -1,0 +1,43 @@
+*
+!*.*
+!snapshots/
+!lfm2-forward-check/
+!inkling-arch-check/
+!gdn-l2norm-check/
+!gemma4-tokenizer-check/
+!gemma4-golden/
+# golden vectors from the official DeepSeek-V4 encoder (2026-10-01); other tests/data content stays ignored
+!data/
+data/*
+!data/dsv4-golden/
+# tensor-bearing random-weight deepseek4 generator + CPU-vs-CUDA differential script (2026-10-04)
+!data/dsv4-randw/
+!fusion/
+!llama-context/
+*.o
+ggml-common.h
+**/*.swp
+!peg-parser
+# webp decode fixtures for test-mtmd-webp-decode (2026-11-10)
+!webp-fixtures/
+
+# ---- editing-pass backup litter (added 2026-09-20) --------------------------------------------
+# The !*.* above re-includes every dotted filename, which overrides the root .gitignore for this
+# directory: measured, 24 tests/*.pre-* backups stayed visible in git status after the root rules
+# were added, and git check-ignore -v named that line as the reason. The LAST matching pattern
+# wins, so these must sit here, below it.
+*.*.pre-*
+*-backup
+*.bak
+*.bak.*
+*.bak_*
+*.orig
+*.rej
+*.old
+*.notlanded
+*.rejected
+
+# In-Place TTT oracle: official ByteDance-Seed/In-Place-TTT code vendored unmodified (row S69-FORK-INPLACE-TTT-2026-10-26-01)
+!ttt-inplace-oracle/
+!ttt-inplace-oracle/hf_qwen3/
+!ttt-inplace-oracle/LICENSE

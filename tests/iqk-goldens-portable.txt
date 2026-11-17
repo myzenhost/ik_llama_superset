@@ -1,0 +1,64 @@
+# IQ*_K GOLDEN VECTORS -- CROSS-TOOLCHAIN SET (floating-point contraction DISABLED)
+#
+# USE THIS FILE TO VALIDATE A REIMPLEMENTATION. Use iqk-goldens.txt to detect changes in this
+# tree's own default build; the two are not interchangeable and the difference is measured, below.
+#
+# name qhash dhash qbytes -- FNV-1a 64 over the reference-quantized BYTES and over the
+# dequantized FLOAT BITS, for 4096 deterministic floats. Same columns as iqk-goldens.txt.
+#
+# WHY A SECOND FILE EXISTS. Measured 2026-09-14, three build configurations:
+#     mingw g++ (default contraction)   \  disagree on 9 of 21 types: 4 in BYTES only,
+#     MSVC cl.exe (/fp:precise)         /  5 in the DEQUANTIZED VALUES themselves
+#     mingw g++ -ffp-contract=off       -> agrees with MSVC on ALL 21, byte for byte
+# Every one of the 9 divergent types moved to MSVC's values under -ffp-contract=off; none stayed
+# unchanged and none took a third value. gcc contracts multiply-add into FMA by default, MSVC
+# /fp:precise does not; the resulting last-bit differences flip tie-breaking inside the search
+# these quantizers perform.
+#
+# CONSEQUENCE: a port CAN be held to byte equality, but only against a reference built with
+# contraction disabled. Held against a default gcc build it would fail on 9 of 21 types while
+# being perfectly correct.
+#
+# HOW TO REPRODUCE THIS FILE:
+#   cmake -S . -B build-static-nofma -G Ninja -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=OFF \
+#         -DGGML_STATIC=ON -DLLAMA_BUILD_TESTS=ON \
+#         -DCMAKE_C_FLAGS=-ffp-contract=off -DCMAKE_CXX_FLAGS=-ffp-contract=off
+#   ninja -C build-static-nofma test-iqk-golden
+#   ./build-static-nofma/bin/test-iqk-golden.exe            # from tests/
+# Verify with:  test-iqk-golden.exe --verify iqk-goldens-portable.txt
+#
+# These values were produced by the -ffp-contract=off build AND independently reproduced,
+# byte for byte, by the MSVC build before this file was written. A portable golden taken from a
+# single compiler would be an assumption, not a measurement.
+# Generator: temp/_gen_portable_goldens.py
+iq2_k 797298d2ff7c70ea 8bde7bcebd1e9203 1216
+iq3_k 026277c72d2e65fb bb19574ade8f5e83 1760
+iq4_k 88fe3de2b3acd626 5a1b6c75178a2703 2304
+iq5_k 7b23ea7b9f4ed67f d76066477d3e8483 2816
+iq6_k 1c2f86bbecf47d5b 8160d3ae3e560a03 3392
+iq4_ks a37fdee428858a21 015b7bc37dfa9d4f 2180
+iq2_ks d9126c04c40e80b2 994ec37114216003 1122
+iq4_kss a69d58206b9c6ea8 bff170c12e451a83 2052
+iq5_ks 0787a8c5216df3fc 35f6579dcbd1ac8b 2692
+iq2_kt f86d48b906b03757 4b3599d4c244f97e 1092
+iq3_kt f9036430f62bcf42 44d9912b2637e99d 1604
+iq4_kt d9edef1c85710973 38684d92426c8570 2052
+iq3_ks ee32165f314f06bf 648df925adf3c103 1634
+iq2_kl f9c5f92fd9de5046 c74a4193037df703 1378
+iq1_kt 837030ec364d6072 b598ec1986ea030f 900
+iq2_k_r4 f7cf004d0d3d8272 8bde7bcebd1e9203 1216
+iq3_k_r4 5add80c1d2b644ff bb19574ade8f5e83 1760
+iq4_k_r4 3fa2608360a89740 5a1b6c75178a2703 2304
+iq5_k_r4 ec43f7b0a5c97050 d76066477d3e8483 2816
+iq4_ks_r4 849b49c920245837 584160f950e8491e 2192
+# iq4_ks_r16: written 2026-09-30 by the MSVC 14.51 build of the ik-main merge (first golden for this ik-main type). MSVC /fp:precise does not contract,
+# so the line belongs to the contraction-off class; it freezes behaviour INCLUDING the (16,k/16) row-count fix of quantize_row_iq4_ks_r16_ref, and is
+# UNVERIFIED under mingw (contraction on). Payload 2240 = 16*ggml_row_size(type,256).
+iq4_ks_r16 3d32f4abd23ef097 17bada7d8ab91f2c 2240
+# 2026-10-05 (integ/absent-branches-1005): iq4_ks_r16 above is now VERIFIED under mingw g++ -ffp-contract=off (builds/integ-1005-nofma), not only MSVC.
+# iq2_kt / iq3_kt dhash refreshed: c3f9ea091 added the x1.05 / x1.01 run-time scale to the CPU to_float (same qhash, new dequantized bits; identical under
+# contraction on and off). iq4_kt line refreshed from the -ffp-contract=off build: it now computes d9edef1c85710973 / 38684d92426c8570 under BOTH contraction modes
+# (the old contraction-off value 25455f3f.../425e03f1... differs). CAUSE NOT ISOLATED: 9da759dfe (best IQ4_KT warm-start score kept, #2567, 2026-09-30) touched exactly this
+# search and is the leading candidate; the experiment that would settle it is the nofma build of iqk_quantize.cpp at 9da759dfe^ (row filed in the findings note).
+# NOT yet reproduced under MSVC for these three lines (no MSVC build in this session): a cross-toolchain claim needs that run.
+iq5_ks_r4 4d1158c0efa203f9 abfb87d3d3955bbd 2704

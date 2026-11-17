@@ -1,0 +1,27 @@
+ik_llama SWA KV compaction: does it engage, and for which models: PROVEN
+  positive  compaction ENGAGES on a supports_swa_compress() arch (laguna) pass
+  positive  that engagement SHRINKS the KV cache >10%            pass
+  positive  Gemma-4/Gemma-3 are SWA models (n_swa > 0)           pass
+  positive  Gemma arms: flag REFUSED, no compaction line         pass
+  positive  Gemma arms: KV size byte-identical with and without the flag pass
+  control   DISCRIMINATOR: the flag can shrink SOMETHING (else probe is blind) behaved
+  control   NON-SWA (n_swa==0) model is unaffected by the flag   behaved
+  control   no arm shows compaction WITHOUT the flag             behaved
+  control   uncompacted arms scale KV exactly linearly with n_ctx behaved
+
+  scaling   gemma4_e2b       8192-> 32768  KV x4.000 (dense expects x4.0)
+  scaling   gemma3_1b        8192-> 32768  KV x4.000 (dense expects x4.0)
+  scaling   gemma4_a4b      65536->262144  KV x4.000 (dense expects x4.0)
+  scaling   llama32_1b       8192-> 32768  KV x4.000 (dense expects x4.0)
+
+MEASURED ALLOCATION (KV self size, MiB):
+  gemma4_e2b   arch=gemma4  n_swa=512    n_ctx=8192    plain=    144.0  --swa-compress=    144.0  saved=  0.0%  --swa-compress is not implemented for this model; ignoring
+  gemma4_e2b   arch=gemma4  n_swa=512    n_ctx=32768   plain=    576.0  --swa-compress=    576.0  saved=  0.0%  --swa-compress is not implemented for this model; ignoring
+  gemma4_a4b   arch=gemma4  n_swa=1024   n_ctx=65536   plain=  14080.0  --swa-compress=  14080.0  saved=  0.0%  --swa-compress is not implemented for this model; ignoring
+  gemma4_a4b   arch=gemma4  n_swa=1024   n_ctx=262144  plain=  56320.0  --swa-compress=  56320.0  saved=  0.0%  --swa-compress is not implemented for this model; ignoring
+  gemma3_1b    arch=gemma3  n_swa=512    n_ctx=8192    plain=    208.0  --swa-compress=    208.0  saved=  0.0%  --swa-compress is not implemented for this model; ignoring
+  gemma3_1b    arch=gemma3  n_swa=512    n_ctx=32768   plain=    832.0  --swa-compress=    832.0  saved=  0.0%  --swa-compress is not implemented for this model; ignoring
+  laguna_s21   arch=laguna  n_swa=512    n_ctx=8192    plain=   1536.0  --swa-compress=    528.0  saved= 65.6%  36 of 48 layers compacted, 1024-1024 rows each (dense 8192), window 512, n_ubatch 512
+  laguna_s21   arch=laguna  n_swa=512    n_ctx=32768   plain=   6144.0  --swa-compress=   1680.0  saved= 72.7%  36 of 48 layers compacted, 1024-1024 rows each (dense 32768), window 512, n_ubatch 512
+  llama32_1b   arch=llama   n_swa=0      n_ctx=8192    plain=    256.0  --swa-compress=    256.0  saved=  0.0%  --swa-compress is not implemented for this model; ignoring
+  llama32_1b   arch=llama   n_swa=0      n_ctx=32768   plain=   1024.0  --swa-compress=   1024.0  saved=  0.0%  --swa-compress is not implemented for this model; ignoring

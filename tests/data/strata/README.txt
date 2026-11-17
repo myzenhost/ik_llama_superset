@@ -1,0 +1,1 @@
+rcall_specimens.json: copied unchanged from Strata serve/fixtures/rcall_specimens.json @82f46a8c8 (MIT licence, https://github.com/Niko1221/Strata). Data only, used by test-chat to check common_chat_rescue_reasoning_calls.

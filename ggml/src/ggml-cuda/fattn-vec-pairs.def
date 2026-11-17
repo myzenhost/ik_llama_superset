@@ -1,0 +1,108 @@
+// The ONE list of (Dk, Dv, K type, V type) flash-attention vec cases this fork can dispatch for the
+// non-turbo quantised KV types. It is read by THREE consumers, so they cannot drift:
+//   * fattn-vec-f16.cu / fattn-vec-f32.cu   expand it into the dispatch if-chain (#include with FA_VEC_PAIR defined),
+//   * the same two files' *_is_supported    expand it into the capability answer (via fattn-vec-pairs.cuh),
+//   * ggml/cmake/common.cmake               PARSES these lines (file(STRINGS) + regex) to learn which K-V pairs exist,
+//                                           to validate GGML_CUDA_FA_QUANTS, and to require the instance .cu files.
+// Keep every entry on ONE line in exactly the form  FA_VEC_PAIR(Dk, Dv, K, V)  with K and V the ggml_type suffix
+// (GGML_TYPE_<K>). FA_VEC_PAIR_F32 entries exist for the f32 kernel only. An entry is compiled/dispatched only when
+// its K-V pair is selected by GGML_CUDA_FA_QUANTS (f16-f16 is always selected); the TurboQuant cases are NOT here, they stay
+// unconditional in fattn-vec-f16.cu / fattn-vec-f32.cu.
+//
+// Entries marked NEW-DISPATCH had instance files in the tree (compiled under the old GGML_CUDA_FA_ALL_QUANTS) but no dispatch
+// line, so supports_op answered no for them; they are dispatched now. Device-validate with test-backend-ops (see the findings);
+// deleting a line here removes the pair from the dispatch, the capability answer and the CMake pair list at once.
+//
+// BF16 (S69-FORK-CUDA-FA-VEC-BF16-KV-KERNELS-2026-11-08-01): vec_dot_fattn_vec_KQ_bf16 / dequantize_1_bf16 exist now
+// (fattn-vec-common.cuh), so the 17 bf16 cases below are dispatched. Same head-size pattern as the other types: hs64 for f16 K with
+// any V plus bf16 K, hs128 for every pair against the 5 legacy quants and f16, hs256 for the symmetric pair only.
+
+// ---- head size 64: f16 K with any V --------------------------------------------------------------
+FA_VEC_PAIR( 64,  64, F16,   F16)
+FA_VEC_PAIR( 64,  64, F16,   Q4_0)
+FA_VEC_PAIR( 64,  64, F16,   Q4_1)
+FA_VEC_PAIR( 64,  64, F16,   Q5_0)
+FA_VEC_PAIR( 64,  64, F16,   Q5_1)
+FA_VEC_PAIR( 64,  64, F16,   Q8_0)
+FA_VEC_PAIR( 64,  64, F16,   IQ4_NL)   // NEW-DISPATCH
+FA_VEC_PAIR( 64,  64, F16,   BF16)
+FA_VEC_PAIR( 64,  64, BF16,  F16)
+FA_VEC_PAIR( 64,  64, BF16,  BF16)
+
+// ---- head size 128 ----------------------------------------------------------------------------------
+FA_VEC_PAIR(128, 128, F16,   F16)
+FA_VEC_PAIR(128, 128, F16,   Q4_0)
+FA_VEC_PAIR(128, 128, F16,   Q4_1)
+FA_VEC_PAIR(128, 128, F16,   Q5_0)
+FA_VEC_PAIR(128, 128, F16,   Q5_1)
+FA_VEC_PAIR(128, 128, F16,   Q8_0)
+FA_VEC_PAIR(128, 128, F16,   IQ4_NL)   // NEW-DISPATCH
+FA_VEC_PAIR(128, 128, F16,   BF16)
+
+FA_VEC_PAIR(128, 128, Q4_0,  F16)
+FA_VEC_PAIR(128, 128, Q4_0,  Q4_0)
+FA_VEC_PAIR(128, 128, Q4_0,  Q4_1)
+FA_VEC_PAIR(128, 128, Q4_0,  Q5_0)
+FA_VEC_PAIR(128, 128, Q4_0,  Q5_1)
+FA_VEC_PAIR(128, 128, Q4_0,  Q8_0)
+FA_VEC_PAIR(128, 128, Q4_0,  IQ4_NL)   // NEW-DISPATCH
+FA_VEC_PAIR(128, 128, Q4_0,  BF16)
+
+FA_VEC_PAIR(128, 128, Q4_1,  F16)
+FA_VEC_PAIR(128, 128, Q4_1,  Q4_0)
+FA_VEC_PAIR(128, 128, Q4_1,  Q4_1)
+FA_VEC_PAIR(128, 128, Q4_1,  Q5_0)
+FA_VEC_PAIR(128, 128, Q4_1,  Q5_1)
+FA_VEC_PAIR(128, 128, Q4_1,  Q8_0)
+FA_VEC_PAIR(128, 128, Q4_1,  IQ4_NL)   // NEW-DISPATCH
+FA_VEC_PAIR(128, 128, Q4_1,  BF16)
+
+FA_VEC_PAIR(128, 128, Q5_0,  F16)
+FA_VEC_PAIR(128, 128, Q5_0,  Q4_0)
+FA_VEC_PAIR(128, 128, Q5_0,  Q4_1)
+FA_VEC_PAIR(128, 128, Q5_0,  Q5_0)
+FA_VEC_PAIR(128, 128, Q5_0,  Q5_1)
+FA_VEC_PAIR(128, 128, Q5_0,  Q8_0)
+FA_VEC_PAIR(128, 128, Q5_0,  IQ4_NL)   // NEW-DISPATCH
+FA_VEC_PAIR(128, 128, Q5_0,  BF16)
+
+FA_VEC_PAIR(128, 128, Q5_1,  F16)
+FA_VEC_PAIR(128, 128, Q5_1,  Q4_0)
+FA_VEC_PAIR(128, 128, Q5_1,  Q4_1)
+FA_VEC_PAIR(128, 128, Q5_1,  Q5_0)
+FA_VEC_PAIR(128, 128, Q5_1,  Q5_1)
+FA_VEC_PAIR(128, 128, Q5_1,  Q8_0)
+FA_VEC_PAIR(128, 128, Q5_1,  IQ4_NL)   // NEW-DISPATCH
+FA_VEC_PAIR(128, 128, Q5_1,  BF16)
+
+FA_VEC_PAIR(128, 128, Q8_0,  F16)
+FA_VEC_PAIR(128, 128, Q8_0,  Q4_0)
+FA_VEC_PAIR(128, 128, Q8_0,  Q4_1)
+FA_VEC_PAIR(128, 128, Q8_0,  Q5_0)
+FA_VEC_PAIR(128, 128, Q8_0,  Q5_1)
+FA_VEC_PAIR(128, 128, Q8_0,  Q8_0)
+FA_VEC_PAIR(128, 128, Q8_0,  IQ4_NL)
+FA_VEC_PAIR(128, 128, Q8_0,  BF16)
+FA_VEC_PAIR(128, 128, Q8_0,  Q6_0)
+
+FA_VEC_PAIR(128, 128, IQ4_NL, IQ4_NL)
+FA_VEC_PAIR(128, 128, BF16,  F16)
+FA_VEC_PAIR(128, 128, BF16,  Q4_0)
+FA_VEC_PAIR(128, 128, BF16,  Q4_1)
+FA_VEC_PAIR(128, 128, BF16,  Q5_0)
+FA_VEC_PAIR(128, 128, BF16,  Q5_1)
+FA_VEC_PAIR(128, 128, BF16,  Q8_0)
+FA_VEC_PAIR(128, 128, BF16,  BF16)
+FA_VEC_PAIR(128, 128, Q6_0,  Q5_0)
+FA_VEC_PAIR(128, 128, Q6_0,  Q6_0)
+
+// ---- head size 256: f16-f16 and q8_0-q8_0 only (what the instance files carry) -------------------
+FA_VEC_PAIR(256, 256, F16,   F16)
+FA_VEC_PAIR(256, 256, Q8_0,  Q8_0)
+FA_VEC_PAIR(256, 256, BF16,  BF16)
+
+// ---- asymmetric heads (Dk != Dv) -------------------------------------------------------------------
+FA_VEC_PAIR(192, 128, F16,   F16)
+FA_VEC_PAIR(192, 128, Q8_0,  Q8_0)
+FA_VEC_PAIR_F32(576, 512, F16,  F16)
+FA_VEC_PAIR_F32(576, 512, Q8_0, Q8_0)

@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "family": "voxtral",
+  "display_name": "Voxtral Mini 3B 2507",
+  "description": "Mistral speech-LLM for transcription, translation and audio understanding. Runs through the mtmd VOXTRAL audio projector already present in this fork; llama-audio --task asr drives it.",
+  "category": "asr",
+  "status": "supported",
+  "tasks": ["asr", "s2s"],
+  "modes": ["offline"],
+  "languages": ["auto"],
+  "runtime": { "tags": ["gguf", "mmproj"], "binary": "llama-audio", "projector": "voxtral" },
+  "packages": [
+    {
+      "id": "voxtral_mini_3b_q4_k_m",
+      "display_name": "Voxtral Mini 3B 2507 Q4_K_M",
+      "default": true,
+      "format": "gguf",
+      "precision": "q4_k_m",
+      "files": ["Voxtral-Mini-3B-2507-Q4_K_M.gguf"],
+      "download": { "kind": "huggingface_file", "repo": "ggml-org/Voxtral-Mini-3B-2507-GGUF" },
+      "local": "models/gguf/mistralai_Voxtral-Mini-3B-2507-Q4_K_M.gguf",
+      "note": "ALREADY OWNED on drive Z: (2.3 GB, model_capability_inventory row 'Voxtral Mini 3B 2507')."
+    },
+    {
+      "id": "voxtral_mini_3b_mmproj_q8_0",
+      "display_name": "Voxtral Mini 3B 2507 audio projector Q8_0",
+      "default": true,
+      "format": "gguf",
+      "precision": "q8_0",
+      "size_bytes": 716000000,
+      "files": ["mmproj-Voxtral-Mini-3B-2507-Q8_0.gguf"],
+      "download": { "kind": "huggingface_file", "repo": "ggml-org/Voxtral-Mini-3B-2507-GGUF" },
+      "note": "MISSING LOCALLY -- this is the only file standing between this fork and a real Voxtral transcription run. Verified present in the repo via the Hugging Face API on 2026-08-31."
+    }
+  ],
+  "example": "llama-audio --task asr -m Voxtral-Mini-3B-2507-Q4_K_M.gguf --mmproj mmproj-Voxtral-Mini-3B-2507-Q8_0.gguf --audio speech.wav",
+  "ui": { "recommended_package": "voxtral_mini_3b_q4_k_m", "tags": ["ASR", "GGUF"] }
+}

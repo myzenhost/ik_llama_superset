@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "family": "wavtokenizer",
+  "display_name": "WavTokenizer Large 75 decoder",
+  "description": "Acoustic codec decoder: conv1d -> 6-layer posnet -> layer norm -> 12-layer ConvNeXt -> head, producing an ISTFT spectrogram at 24 kHz. Implemented as a standalone ggml graph in examples/tts/wavtokenizer.cpp so that no libllama architecture had to be added to this deliberately divergent fork.",
+  "category": "codec",
+  "status": "supported",
+  "tasks": ["codec"],
+  "modes": ["offline"],
+  "languages": ["lang agnostic"],
+  "runtime": { "tags": ["gguf"], "sample_rate": 24000, "supported_dtypes": ["f32", "f16"] },
+  "packages": [
+    {
+      "id": "wavtokenizer_large_75_f16",
+      "display_name": "WavTokenizer Large 75 F16",
+      "default": true,
+      "format": "gguf",
+      "precision": "f16",
+      "size_bytes": 130186688,
+      "files": ["WavTokenizer-Large-75-F16.gguf"],
+      "download": { "kind": "huggingface_file", "repo": "ggml-org/WavTokenizer" }
+    },
+    {
+      "id": "wavtokenizer_large_75_q5_1",
+      "display_name": "WavTokenizer Large 75 Q5_1",
+      "default": false,
+      "format": "gguf",
+      "precision": "q5_1",
+      "size_bytes": 73300000,
+      "files": ["WavTokenizer-Large-75-Q5_1.gguf"],
+      "download": { "kind": "huggingface_file", "repo": "ggml-org/WavTokenizer" },
+      "note": "NOT loadable yet: the standalone decoder accepts F32/F16 weights only and rejects quantised tensors with a clear error rather than producing noise."
+    }
+  ],
+  "ui": { "recommended_package": "wavtokenizer_large_75_f16", "tags": ["Codec", "GGUF"] }
+}

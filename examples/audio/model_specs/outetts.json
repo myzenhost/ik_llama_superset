@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "family": "outetts",
+  "display_name": "OuteTTS 0.3 500M + WavTokenizer",
+  "description": "Llama-architecture backbone that emits WavTokenizer acoustic codes. The backbone runs on libllama; the codes are decoded by examples/tts/wavtokenizer.cpp and turned into a waveform by the ISTFT head in audio-common.",
+  "category": "tts",
+  "status": "supported",
+  "tasks": [
+    "tts"
+  ],
+  "modes": [
+    "offline"
+  ],
+  "languages": [
+    "en"
+  ],
+  "runtime": {
+    "tags": [
+      "gguf"
+    ],
+    "binary": "llama-tts",
+    "vocoder_required": true
+  },
+  "packages": [
+    {
+      "id": "outetts_0_3_500m_q4_k_m",
+      "display_name": "OuteTTS 0.3 500M Q4_K_M",
+      "default": false,
+      "format": "gguf",
+      "precision": "q4_k_m",
+      "size_bytes": 403406592,
+      "license": "cc-by-sa-4.0",
+      "files": [
+        "OuteTTS-0.3-500M-Q4_K_M.gguf"
+      ],
+      "download": {
+        "kind": "huggingface_file",
+        "repo": "OuteAI/OuteTTS-0.3-500M-GGUF"
+      },
+      "status": "REJECTED -- negative control",
+      "note": "MEASURED 2026-08-31 through identical code: -46 dBFS output whose words did not match the request. Kept on disk as the negative control for the 0.2 pairing."
+    },
+    {
+      "id": "outetts_0_2_500m_q8_0",
+      "display_name": "OuteTTS 0.2 500M Q8_0 (VERIFIED pairing)",
+      "default": true,
+      "format": "gguf",
+      "precision": "q8_0",
+      "license": "cc-by-nc-4.0",
+      "files": [
+        "OuteTTS-0.2-500M-Q8_0.gguf"
+      ],
+      "download": {
+        "kind": "huggingface_file",
+        "repo": "OuteAI/OuteTTS-0.2-500M-GGUF"
+      },
+      "size_bytes": 536700000,
+      "note": "The pairing llama.cpp b4404 documented with WavTokenizer-Large-75. VERIFIED: synthesised text transcribes back verbatim through this fork own Voxtral ASR. Licence is cc-by-nc-4.0 (non-commercial) -- correctness chose this, licence did not."
+    }
+  ],
+  "dependencies": [
+    "wavtokenizer"
+  ],
+  "example": "llama-tts -m OuteTTS-0.2-500M-Q8_0.gguf --vocoder-model WavTokenizer-Large-75-F16.gguf -p \"hello world\" -o out.wav --tts-normalize --metrics",
+  "ui": {
+    "recommended_package": "outetts_0_2_500m_q8_0",
+    "tags": [
+      "TTS",
+      "GGUF"
+    ]
+  }
+}

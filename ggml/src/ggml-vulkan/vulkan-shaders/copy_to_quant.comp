@@ -1,0 +1,513 @@
+#version 450
+
+#include "types.glsl"
+
+// TurboQuant writer: one workgroup quantises ONE 128-element rotation group (one invocation per element); see the TURBO_WRITER section below.
+#if defined(DATA_A_TURBO2_0) || defined(DATA_A_TURBO3_0) || defined(DATA_A_TURBO4_0)
+#define TURBO_WRITER
+layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
+const uint BLOCK_SIZE = 128;
+#elif defined(SET_ROWS) && QUANT_K == 1
+layout(local_size_x = 512, local_size_y = 1, local_size_z = 1) in;
+const uint BLOCK_SIZE = 512;
+#else
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+const uint BLOCK_SIZE = 32;
+#endif
+
+layout (binding = 0) readonly buffer S {S_TYPE data_s[];};
+
+#if defined(SET_ROWS)
+#include "generic_binary_head.glsl"
+layout (binding = 1) readonly buffer C {B_TYPE data_i[];};
+layout (binding = 2) writeonly buffer Q {A_TYPE data_q[];};
+
+#if B_SIZE == 64
+#define DATA_I_SWIZZLE .x
+#else
+#define DATA_I_SWIZZLE
+#endif
+
+#else
+#include "generic_unary_head.glsl"
+layout (binding = 1) writeonly buffer Q {A_TYPE data_q[];};
+#endif
+
+#if defined(DATA_A_Q4_0)
+void quantize(uint dst_idx, uint src_idx)
+{
+    float amax = 0.0;
+    float vmax = 0.0;
+
+    [[unroll]] for (int j = 0; j < QUANT_K_Q4_0; ++j) {
+        const float v = float(data_s[src_idx + j]);
+        if (amax < abs(v)) {
+            amax = abs(v);
+            vmax = v;
+        }
+    }
+
+    const float d  = vmax / -8;
+    const float id = (d != 0.0) ? 1.0/d : 0.0;
+
+    data_q[dst_idx].d = float16_t(d);
+
+    [[unroll]] for (int j = 0; j < QUANT_K_Q4_0/2; ++j) {
+        const float x0 = float(data_s[src_idx + 0              + j])*id;
+        const float x1 = float(data_s[src_idx + QUANT_K_Q4_0/2 + j])*id;
+
+        const uint xi0 = min(15, int(x0 + 8.5));
+        const uint xi1 = min(15, int(x1 + 8.5));
+
+        data_q[dst_idx].qs[j]  = uint8_t(xi0 | (xi1 << 4));
+    }
+}
+#endif
+
+#if defined(DATA_A_Q4_1)
+void quantize(uint dst_idx, uint src_idx)
+{
+    float vmin = 1.0/0.0;
+    float vmax = -vmin;
+
+    [[unroll]] for (int j = 0; j < QUANT_K_Q4_1; ++j) {
+        const float v = float(data_s[src_idx + j]);
+
+        if (v < vmin) vmin = v;
+        if (v > vmax) vmax = v;
+    }
+
+    const float d  = (vmax - vmin) / ((1 << 4) - 1);
+    const float id = (d != 0.0) ? 1.0/d : 0.0;
+
+    data_q[dst_idx].d = float16_t(d);
+    data_q[dst_idx].m = float16_t(vmin);
+
+    [[unroll]] for (int j = 0; j < QUANT_K_Q4_1/2; ++j) {
+        const float x0 = (float(data_s[src_idx + 0              + j]) - vmin)*id;
+        const float x1 = (float(data_s[src_idx + QUANT_K_Q4_1/2 + j]) - vmin)*id;
+
+        const uint xi0 = min(15, int(x0 + 0.5));
+        const uint xi1 = min(15, int(x1 + 0.5));
+
+        data_q[dst_idx].qs[j]  = uint8_t(xi0 | (xi1 << 4));
+    }
+}
+#endif
+
+#if defined(DATA_A_Q5_0)
+void quantize(uint dst_idx, uint src_idx)
+{
+    float amax = 0.0;
+    float vmax = 0.0;
+
+    [[unroll]] for (int j = 0; j < QUANT_K_Q5_0; ++j) {
+        const float v = float(data_s[src_idx + j]);
+        if (amax < abs(v)) {
+            amax = abs(v);
+            vmax = v;
+        }
+    }
+
+    const float d  = vmax / -16;
+    const float id = (d != 0.0) ? 1.0/d : 0.0;
+
+    data_q[dst_idx].d = float16_t(d);
+
+    uint32_t qh = 0;
+    [[unroll]] for (int j = 0; j < QUANT_K_Q5_0/2; ++j) {
+        const float x0 = float(data_s[src_idx + 0              + j])*id;
+        const float x1 = float(data_s[src_idx + QUANT_K_Q5_0/2 + j])*id;
+
+        const uint xi0 = min(31, int(x0 + 16.5));
+        const uint xi1 = min(31, int(x1 + 16.5));
+
+        data_q[dst_idx].qs[j]  = uint8_t((xi0 & 0xf) | ((xi1 & 0xf) << 4));
+        qh |= ((xi0 & 0x10u) >> 4) << (j + 0);
+        qh |= ((xi1 & 0x10u) >> 4) << (j + QUANT_K_Q5_0/2);
+    }
+    data_q[dst_idx].qh[0] = uint16_t(qh & 0xFFFF);
+    data_q[dst_idx].qh[1] = uint16_t(qh >> 16);
+}
+#endif
+
+#if defined(DATA_A_Q5_1)
+void quantize(uint dst_idx, uint src_idx)
+{
+    float min = float(data_s[src_idx + 0]);
+    float max = min;
+
+    [[unroll]] for (int j = 1; j < QUANT_K_Q5_1; ++j) {
+        const float v = float(data_s[src_idx + j]);
+        min = v < min ? v : min;
+        max = v > max ? v : max;
+    }
+
+    const float d  = (max - min) / 31;
+    const float id = (d != 0) ? 1.0/d : 0.0;
+
+    data_q[dst_idx].d = float16_t(d);
+    data_q[dst_idx].m = float16_t(min);
+
+    uint32_t qh = 0;
+    [[unroll]] for (int j = 0; j < QUANT_K_Q5_1/2; ++j) {
+        const float x0 = (float(data_s[src_idx + 0              + j]) - min)*id;
+        const float x1 = (float(data_s[src_idx + QUANT_K_Q5_1/2 + j]) - min)*id;
+
+        const uint xi0 = uint(x0 + 0.5);
+        const uint xi1 = uint(x1 + 0.5);
+
+        data_q[dst_idx].qs[j]  = uint8_t((xi0 & 0xf) | ((xi1 & 0xf) << 4));
+        qh |= ((xi0 & 0x10u) >> 4) << (j + 0);
+        qh |= ((xi1 & 0x10u) >> 4) << (j + QUANT_K_Q5_1/2);
+    }
+    data_q[dst_idx].qh = qh;
+}
+#endif
+
+#if defined(DATA_A_Q8_0)
+void quantize(uint dst_idx, uint src_idx)
+{
+    float amax = 0.0; // absolute max
+
+    [[unroll]] for (int j = 0; j < QUANT_K_Q8_0; j++) {
+        const float v = float(data_s[src_idx + j]);
+        amax = max(amax, abs(v));
+    }
+
+    const float d = amax / ((1 << 7) - 1);
+    const float id = (d != 0.0) ? 1.0/d : 0.0;
+
+    data_q[dst_idx].d = float16_t(d);
+
+    [[unroll]] for (int j = 0; j < QUANT_K_Q8_0; ++j) {
+        const float x0 = float(data_s[src_idx + j])*id;
+
+        data_q[dst_idx].qs[j] = int8_t(round(x0));
+    }
+}
+#endif
+
+#if defined(DATA_A_Q1_0)
+void quantize(uint dst_idx, uint src_idx)
+{
+    float sum_abs = 0.0;
+
+    [[unroll]] for (int j = 0; j < QUANT_K_Q1_0; j++) {
+        sum_abs += abs(float(data_s[src_idx + j]));
+    }
+
+    const float d = sum_abs / QUANT_K_Q1_0;
+
+    data_q[dst_idx].d = float16_t(d);
+
+    [[unroll]] for (int j = 0; j < QUANT_K_Q1_0 / 8; ++j) {
+        data_q[dst_idx].qs[j] = uint8_t(0);
+    }
+
+    [[unroll]] for (int j = 0; j < QUANT_K_Q1_0; ++j) {
+        if (float(data_s[src_idx + j]) >= 0.0) {
+            data_q[dst_idx].qs[j / 8] |= uint8_t(1 << (j % 8));
+        }
+    }
+}
+#endif
+
+#if defined(DATA_A_Q2_0)
+uint quantize_q2_0(float x)
+{
+    const int q = int(x >= 0.0f ? floor(x + 0.5f) : ceil(x - 0.5f)) + 1;
+    return uint(clamp(q, 0, 3));
+}
+
+void quantize(uint dst_idx, uint src_idx)
+{
+    float amax = 0.0f;
+
+    [[unroll]] for (int j = 0; j < QUANT_K_Q2_0; ++j) {
+        amax = max(amax, abs(float(data_s[src_idx + j])));
+    }
+
+    const float d = amax;
+    const float id = d != 0.0f ? 1.0f / d : 0.0f;
+
+    data_q[dst_idx].d = float16_t(d);
+
+    [[unroll]] for (int j = 0; j < QUANT_K_Q2_0 / 4; ++j) {
+        const uint q0 = quantize_q2_0(float(data_s[src_idx + 4*j    ]) * id);
+        const uint q1 = quantize_q2_0(float(data_s[src_idx + 4*j + 1]) * id);
+        const uint q2 = quantize_q2_0(float(data_s[src_idx + 4*j + 2]) * id);
+        const uint q3 = quantize_q2_0(float(data_s[src_idx + 4*j + 3]) * id);
+        data_q[dst_idx].qs[j] = uint8_t(q0 | (q1 << 2u) | (q2 << 4u) | (q3 << 6u));
+    }
+}
+#endif
+
+#if defined(DATA_A_IQ4_NL)
+uint best_index(float x) {
+    if (x <= kvalues_iq4nl[0]) return 0;
+    if (x >= kvalues_iq4nl[15]) return 15;
+    int ml = 0, mu = 15;
+    while (mu-ml > 1) {
+        int mav = (ml+mu)/2;
+        if (x < kvalues_iq4nl[mav]) mu = mav; else ml = mav;
+    }
+    return x - kvalues_iq4nl[mu-1] < kvalues_iq4nl[mu] - x ? mu-1 : mu;
+}
+
+void quantize(uint dst_idx, uint src_idx)
+{
+    float amax = 0.0;
+    float vmax = 0.0;
+
+    [[unroll]] for (int j = 0; j < QUANT_K_IQ4_NL; ++j) {
+        const float v = float(data_s[src_idx + j]);
+        if (amax < abs(v)) {
+            amax = abs(v);
+            vmax = v;
+        }
+    }
+
+    float d = vmax / kvalues_iq4nl[0];
+    const float id = (d != 0.0) ? 1.0/d : 0.0;
+
+    float sumqx = 0, sumq2 = 0;
+    [[unroll]] for (int j = 0; j < QUANT_K_IQ4_NL/2; ++j) {
+        const float x0 = float(data_s[src_idx + 0                + j])*id;
+        const float x1 = float(data_s[src_idx + QUANT_K_IQ4_NL/2 + j])*id;
+        const uint xi0 = best_index(x0);
+        const uint xi1 = best_index(x1);
+        data_q[dst_idx].qs[j] = uint8_t(xi0 | (xi1 << 4));
+        const float v0 = kvalues_iq4nl[xi0];
+        const float v1 = kvalues_iq4nl[xi1];
+        const float w0 = float(data_s[src_idx + 0                + j])*float(data_s[src_idx + 0                + j]);
+        const float w1 = float(data_s[src_idx + QUANT_K_IQ4_NL/2 + j])*float(data_s[src_idx + QUANT_K_IQ4_NL/2 + j]);
+        sumqx += w0*v0*float(data_s[src_idx + j]) + w1*v1*float(data_s[src_idx + QUANT_K_IQ4_NL/2 + j]);
+        sumq2 += w0*v0*v0 + w1*v1*v1;
+    }
+
+    data_q[dst_idx].d = float16_t(sumq2 > 0 ? sumqx/sumq2 : d);
+
+}
+#endif
+
+#if defined(DATA_A_F32) || defined(DATA_A_F16)
+void quantize(uint dst_idx, uint src_idx)
+{
+    data_q[dst_idx] = A_TYPE(float(data_s[src_idx]));
+}
+#endif
+
+#if defined(DATA_A_BF16)
+void quantize(uint dst_idx, uint src_idx)
+{
+    data_q[dst_idx] = A_TYPE(fp32_to_bf16(float(data_s[src_idx])));
+}
+#endif
+
+#if defined(TURBO_WRITER)
+
+// ---- TurboQuant KV writer (turbo2 / turbo3 / turbo4) -----------------------------------------------------------------------------------
+// For each 128-element group of a K/V row, exactly what quantize_row_turbo{2,3,4}_0_ref (ggml-turbo-quant.c) does:
+//   1. grp_norm = L2 norm of the group;  x *= (grp_norm > 1e-10 ? 1/grp_norm : 0)
+//   2. forward rotation: x *= S1;  radix-2 Hadamard butterflies h = 1..64;  x *= (1/sqrt(128)) * S2
+//   3. each coordinate -> nearest Lloyd-Max centroid (index = number of thresholds <= value), packed as the block layout in types.glsl
+//   4. norm stored = grp_norm / ||centroids[idx]||  when that is > 1e-10, else grp_norm   (the "corrected" norm, fp16)
+// The block is stored in the ROTATED domain; readers rotate Q into the same basis and un-rotate the attention output (ggml_vk_flash_attn).
+//
+// Everything is plain shared memory + barriers: no subgroup extension, no assumption on the subgroup size. (The first Vulkan port of this feature
+// packed with subgroupShuffle/subgroupBallot and reduced across gl_NumSubgroups into a 16-entry array; it needed a wave64 fix (upstream #241) and
+// breaks for subgroup sizes below 8. The reductions here are tree sums, so the L2 norms differ from the CPU's sequential sum by float rounding only.)
+// Barrier discipline: the early returns below depend on the workgroup id and push constants only, so every barrier() is reached by all 128 invocations.
+// SOURCE-READ: TheTom/llama-cpp-turboquant bcb85fc3ae85 ggml-vulkan/vulkan-shaders/copy_to_quant.comp:246-307,411-749 (MIT); algorithm and thresholds are
+// the CPU reference's, the structure is rewritten.
+#include "turbo_tables.glsl"
+
+shared float tw_x[128];     // the group, then its rotation
+shared float tw_red[128];   // reduction scratch
+shared uint  tw_idx[128];   // centroid indices, for packing
+
+// All 128 invocations call this with their element already in tw_x[t]; invocation 0 .. 127 write disjoint bytes of data_q[blk].
+void turbo_write_group(const uint t, const uint blk) {
+    // 1. L2 norm over the group
+    tw_red[t] = tw_x[t] * tw_x[t];
+    barrier();
+    [[unroll]] for (uint s = 64u; s > 0u; s >>= 1u) {
+        if (t < s) {
+            tw_red[t] += tw_red[t + s];
+        }
+        barrier();
+    }
+    const float grp_norm = sqrt(tw_red[0]);
+    const float inv_norm = grp_norm > 1e-10 ? 1.0 / grp_norm : 0.0;
+    barrier();   // everyone has read tw_red[0] before it is reused
+
+    // 2. normalise, rotate
+    tw_x[t] = tw_x[t] * inv_norm * TURBO_S1[t];
+    barrier();
+    [[unroll]] for (uint h = 1u; h < 128u; h *= 2u) {
+        if ((t % (2u * h)) < h) {
+            const float a = tw_x[t];
+            const float b = tw_x[t + h];
+            tw_x[t]     = a + b;
+            tw_x[t + h] = a - b;
+        }
+        barrier();
+    }
+    const float rv = tw_x[t] * TURBO_INV_SQRT_128 * TURBO_S2[t];
+
+    // 3. nearest centroid
+    uint idx = 0u;
+    float cval = 0.0;
+#if defined(DATA_A_TURBO3_0)
+    idx = rv < TURBO_MID_3BIT[0] ? 0u : rv < TURBO_MID_3BIT[1] ? 1u : rv < TURBO_MID_3BIT[2] ? 2u : rv < TURBO_MID_3BIT[3] ? 3u :
+          rv < TURBO_MID_3BIT[4] ? 4u : rv < TURBO_MID_3BIT[5] ? 5u : rv < TURBO_MID_3BIT[6] ? 6u : 7u;
+    cval = TURBO_CENTROIDS_3BIT[idx];
+#elif defined(DATA_A_TURBO2_0)
+    idx = rv < TURBO_MID_2BIT[0] ? 0u : rv < TURBO_MID_2BIT[1] ? 1u : rv < TURBO_MID_2BIT[2] ? 2u : 3u;
+    cval = TURBO_CENTROIDS_2BIT[idx];
+#else
+    [[unroll]] for (uint i = 0u; i < 15u; i++) {
+        if (rv >= TURBO_MID_4BIT[i]) {
+            idx = i + 1u;
+        }
+    }
+    cval = TURBO_CENTROIDS_4BIT[idx];
+#endif
+    tw_idx[t] = idx;
+    tw_red[t] = cval * cval;
+    barrier();
+
+    // 4. reconstruction norm (tree sum), corrected block norm
+    [[unroll]] for (uint s = 64u; s > 0u; s >>= 1u) {
+        if (t < s) {
+            tw_red[t] += tw_red[t + s];
+        }
+        barrier();
+    }
+    const float recon_norm = sqrt(tw_red[0]);
+
+    // 5. pack. Each output byte is written by exactly one invocation.
+#if defined(DATA_A_TURBO3_0)
+    if (t < 32u) {          // qs: low two index bits of elements 4t .. 4t+3
+        data_q[blk].qs[t] = uint8_t((tw_idx[4u * t] & 3u) | ((tw_idx[4u * t + 1u] & 3u) << 2) | ((tw_idx[4u * t + 2u] & 3u) << 4) | ((tw_idx[4u * t + 3u] & 3u) << 6));
+    } else if (t < 48u) {   // signs: high index bit of elements 8s .. 8s+7
+        const uint sb = t - 32u;
+        uint byte_val = 0u;
+        [[unroll]] for (uint k = 0u; k < 8u; k++) {
+            byte_val |= ((tw_idx[8u * sb + k] >> 2) & 1u) << k;
+        }
+        data_q[blk].signs[sb] = uint8_t(byte_val);
+    }
+#elif defined(DATA_A_TURBO2_0)
+    if (t < 32u) {
+        data_q[blk].qs[t] = uint8_t(tw_idx[4u * t] | (tw_idx[4u * t + 1u] << 2) | (tw_idx[4u * t + 2u] << 4) | (tw_idx[4u * t + 3u] << 6));
+    }
+#else
+    if (t < 64u) {
+        data_q[blk].qs[t] = uint8_t(tw_idx[2u * t] | (tw_idx[2u * t + 1u] << 4));
+    }
+#endif
+    if (t == 127u) {
+        data_q[blk].norm = float16_t(recon_norm > 1e-10 ? grp_norm / recon_norm : grp_norm);
+    }
+}
+
+#if defined(SET_ROWS)
+
+void main() {
+    const uint t = gl_LocalInvocationID.x;
+    const uint g = gl_WorkGroupID.z * 262144 + gl_WorkGroupID.y * 512 + gl_WorkGroupID.x;
+    const uint gpr = p.ne00 / 128u;   // whole groups per source row (the host only claims rows whose length is a multiple of 128)
+
+    if (g >= gpr * p.ne01 * p.ne02 * p.ne03) {
+        return;
+    }
+
+    uint tmp = g;
+    const uint ig  = tmp % gpr;   tmp /= gpr;
+    const uint i01 = tmp % p.ne01; tmp /= p.ne01;
+    const uint i02 = tmp % p.ne02;
+    const uint i03 = tmp / p.ne02;
+
+    const uint i12 = fastmod(i03, p.ne12);
+    const uint i11 = fastmod(i02, p.ne11);
+    const uint i1  = data_i[src1_idx(i01, i11, i12, 0) + get_boffset()] DATA_I_SWIZZLE;
+
+    const uint sb  = src0_idx(ig * 128u, i01, i02, i03) + get_aoffset();
+    const uint dbk = dst_idx(ig, i1, i02, i03) + get_doffset();
+
+    tw_x[t] = float(data_s[sb + t]);
+    barrier();
+    turbo_write_group(t, dbk);
+}
+
+#else
+
+void main() {
+    const uint t   = gl_LocalInvocationID.x;
+    const uint blk = gl_WorkGroupID.z * 262144 + gl_WorkGroupID.y * 512 + gl_WorkGroupID.x;
+    const uint idx = blk * 128u;   // first element of this group in the destination's element numbering
+
+    if (idx >= p.ne) {
+        return;
+    }
+
+    const uint dbk = dst_idx_quant(idx, 128u) + get_doffset();
+    const uint sb  = get_aoffset() + src0_idx(idx);   // the host only claims sources whose rows are multiples of 128 long with dim 0 contiguous
+
+    tw_x[t] = float(data_s[sb + t]);
+    barrier();
+    turbo_write_group(t, dbk);
+}
+
+#endif
+
+#elif defined(SET_ROWS)
+
+void main() {
+#ifdef NEEDS_INIT_IQ_SHMEM
+    init_iq_shmem(gl_WorkGroupSize);
+#endif
+
+    const uint idx = ((gl_WorkGroupID.z * 262144 + gl_WorkGroupID.y * 512 + gl_WorkGroupID.x) * BLOCK_SIZE + gl_LocalInvocationID.x) * QUANT_K;
+
+    if (idx >= p.ne) {
+        return;
+    }
+
+    uint i00, i01, i02, i03;
+    get_indices(idx, i00, i01, i02, i03);
+
+    uint i12 = fastmod(i03, p.ne12);
+    uint i11 = fastmod(i02, p.ne11);
+    uint i10 = i01;
+
+    uint i1 = data_i[src1_idx(i10, i11, i12, 0) + get_boffset()] DATA_I_SWIZZLE;
+
+    uint src0_idx = src0_idx(i00, i01, i02, i03) + get_aoffset();
+    uint dst_idx = dst_idx(i00 / QUANT_K, i1, i02, i03) + get_doffset();
+
+    quantize(dst_idx, src0_idx);
+}
+
+#else
+
+void main() {
+#ifdef NEEDS_INIT_IQ_SHMEM
+    init_iq_shmem(gl_WorkGroupSize);
+#endif
+
+    const uint idx = (gl_WorkGroupID.z * 262144 + gl_WorkGroupID.y * 512 + gl_WorkGroupID.x * 32 + gl_LocalInvocationID.x) * QUANT_K;
+
+    if (idx >= p.ne) {
+        return;
+    }
+
+    uint dst_idx = dst_idx_quant(idx, QUANT_K) + get_doffset();   // + get_doffset(): this path used to ignore the destination's buffer misalignment
+    uint src_idx = get_aoffset() + src0_idx(idx);
+
+    quantize(dst_idx, src_idx);
+}
+
+#endif
